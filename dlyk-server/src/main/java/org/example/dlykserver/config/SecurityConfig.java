@@ -27,6 +27,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(c -> c.configurationSource(configurationSource())) // 确保 CORS 配置优先
+                .csrf().disable() // 如果不需要 CSRF 保护，可以禁用
                 .formLogin(formLogin -> {
                     formLogin.loginProcessingUrl("/api/login")
                             .usernameParameter("loginAct")
@@ -38,22 +40,18 @@ public class SecurityConfig {
                     authorize.requestMatchers("/api/login").permitAll()
                             .anyRequest().authenticated();
                 })
-                .cors((cros) -> {
-                    cros.configurationSource(configurationSource());
-                })
-
                 .build();
     }
 
     @Bean
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081/")); // 生产环境中应限制来源
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 指定允许的方法
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true); // 允许发送 Cookie
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

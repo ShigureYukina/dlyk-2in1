@@ -21,10 +21,15 @@
             <el-input type="password" v-model="user.loginPwd"/>
           </el-form-item>
 
+
           <el-form-item>
             <el-button type="primary" @click="login">登 录</el-button>
           </el-form-item>
-
+          <el-form-item>
+            <el-checkbox value="Online activities" name="rememberMe">
+              记住我
+            </el-checkbox>
+          </el-form-item>
         </el-form>
       </div>
     </el-main>
@@ -33,7 +38,8 @@
 
 <script>
 //从httpRequest.js中导入doPost()函数（.js后缀可以省略）
-import {doGet, doPost} from "../http/httpRequest";
+import {doPost} from "../http/httpRequest";
+import {messageTip} from "../util/util.js";
 // import {clearToken, jwtName, messageTip} from "../util/utils";
 
 //export default { } 这个语法结构是固定的
@@ -83,18 +89,18 @@ export default {
           formData.append("loginAct", this.user.loginAct);
           formData.append("loginPwd", this.user.loginPwd);
           doPost('/api/login', formData).then((response) => { //获取ajax异步请求后的结果
-            console.log(response);
+            console.log(response.data.data);
+            if (response.data.code === 200) {
+              //可以登录
+              messageTip("登录成功", "success")
 
-            //跳转到系统管理主页面（需要学习一下vue的路由）
-            //this.$router.push("/hello"); //这种跳转方式只能用于父路由跳子路由的情况
-            window.location.href = "/dashboard"
-
+            } else {
+              messageTip("登录失败", "error")
+            }
           }).catch((error) => { //当发生异常执行该catch函数
             console.log(error);
 
-          }).finally(() => { //总是会执行
-            // 总是会执行
-          });
+          })
         }
       })
     },
@@ -156,5 +162,9 @@ export default {
 
 .el-button {
   width: 100%;
+}
+
+.el-form {
+  margin: auto;
 }
 </style>

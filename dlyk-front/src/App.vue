@@ -1,12 +1,12 @@
-<script setup>
-import LoginView from "./components/LoginView.vue";
-</script>
-
 <template>
-  <login-view></login-view>
+    <router-view/>
 </template>
 
+<script>
+</script>
 
-<style scoped>
-
+<style>
+body{
+  margin: 0;
+}
 </style>
