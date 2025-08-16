@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bjpowernode.mapper.TTranMapper">
-  <resultMap id="BaseResultMap" type="com.bjpowernode.model.TTran">
+<mapper namespace="com.dlyk.mapper.TTranMapper">
+  <resultMap id="BaseResultMap" type="com.dlyk.model.TTran">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="tran_no" jdbcType="VARCHAR" property="tranNo" />
     <result column="customer_id" jdbcType="INTEGER" property="customerId" />
@@ -29,7 +29,7 @@
     delete from t_tran
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TTran" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TTran" useGeneratedKeys="true">
     insert into t_tran (tran_no, customer_id, money, 
       expected_date, stage, description, 
       next_contact_time, create_time, create_by, 
@@ -39,7 +39,7 @@
       #{nextContactTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=INTEGER}, 
       #{editTime,jdbcType=TIMESTAMP}, #{editBy,jdbcType=INTEGER})
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TTran" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TTran" useGeneratedKeys="true">
     insert into t_tran
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="tranNo != null">
@@ -112,7 +112,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.bjpowernode.model.TTran">
+  <update id="updateByPrimaryKeySelective" parameterType="com.dlyk.model.TTran">
     update t_tran
     <set>
       <if test="tranNo != null">
@@ -151,7 +151,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.bjpowernode.model.TTran">
+  <update id="updateByPrimaryKey" parameterType="com.dlyk.model.TTran">
     update t_tran
     set tran_no = #{tranNo,jdbcType=VARCHAR},
       customer_id = #{customerId,jdbcType=INTEGER},

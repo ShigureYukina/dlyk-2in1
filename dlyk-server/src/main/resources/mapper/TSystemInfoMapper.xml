@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bjpowernode.mapper.TSystemInfoMapper">
-  <resultMap id="BaseResultMap" type="com.bjpowernode.model.TSystemInfo">
+<mapper namespace="com.dlyk.mapper.TSystemInfoMapper">
+  <resultMap id="BaseResultMap" type="com.dlyk.model.TSystemInfo">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="system_code" jdbcType="VARCHAR" property="systemCode" />
     <result column="name" jdbcType="VARCHAR" property="name" />
@@ -38,7 +38,7 @@
     delete from t_system_info
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TSystemInfo" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TSystemInfo" useGeneratedKeys="true">
     insert into t_system_info (system_code, `name`, site, 
       logo, title, description, 
       keywords, shortcuticon, tel, 
@@ -54,7 +54,7 @@
       #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=INTEGER}, #{editTime,jdbcType=TIMESTAMP}, 
       #{editBy,jdbcType=INTEGER})
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TSystemInfo" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TSystemInfo" useGeneratedKeys="true">
     insert into t_system_info
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="systemCode != null">
@@ -175,7 +175,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.bjpowernode.model.TSystemInfo">
+  <update id="updateByPrimaryKeySelective" parameterType="com.dlyk.model.TSystemInfo">
     update t_system_info
     <set>
       <if test="systemCode != null">
@@ -238,7 +238,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.bjpowernode.model.TSystemInfo">
+  <update id="updateByPrimaryKey" parameterType="com.dlyk.model.TSystemInfo">
     update t_system_info
     set system_code = #{systemCode,jdbcType=VARCHAR},
       `name` = #{name,jdbcType=VARCHAR},

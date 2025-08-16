@@ -19,20 +19,18 @@
             </el-icon>
             <span>市场活动</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <Notification/>
-              </el-icon>
-              市场活动
-            </el-menu-item>
-            <el-menu-item index="1-2">
-              <el-icon>
-                <DataAnalysis/>
-              </el-icon>
-              市场统计
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="1-1">
+            <el-icon>
+              <Notification/>
+            </el-icon>
+            市场活动
+          </el-menu-item>
+          <el-menu-item index="1-2">
+            <el-icon>
+              <DataAnalysis/>
+            </el-icon>
+            市场统计
+          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="2">
           <template #title>
@@ -41,14 +39,14 @@
             </el-icon>
             <span>线索管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <Film/>
-              </el-icon>
-              线索管理
-            </el-menu-item>
-          </el-menu-item-group>
+
+          <el-menu-item index="1-1">
+            <el-icon>
+              <Film/>
+            </el-icon>
+            线索管理
+          </el-menu-item>
+
         </el-sub-menu>
         <el-sub-menu index="3">
           <template #title>
@@ -57,14 +55,14 @@
             </el-icon>
             <span>客户管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <CreditCard/>
-              </el-icon>
-              客户管理
-            </el-menu-item>
-          </el-menu-item-group>
+
+          <el-menu-item index="1-1">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            客户管理
+          </el-menu-item>
+
         </el-sub-menu>
         <el-sub-menu index="4">
           <template #title>
@@ -73,14 +71,13 @@
             </el-icon>
             <span>交易管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <CreditCard/>
-              </el-icon>
-              交易管理
-            </el-menu-item>
-          </el-menu-item-group>
+
+          <el-menu-item index="1-1">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            交易管理
+          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="5">
           <template #title>
@@ -89,14 +86,12 @@
             </el-icon>
             <span>产品管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <CreditCard/>
-              </el-icon>
-              产品管理
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="1-1">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            产品管理
+          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="6">
           <template #title>
@@ -105,14 +100,12 @@
             </el-icon>
             <span>字典管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <CreditCard/>
-              </el-icon>
-              字典管理
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="1-1">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            字典管理
+          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="7">
           <template #title>
@@ -121,14 +114,12 @@
             </el-icon>
             <span>用户管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <CreditCard/>
-              </el-icon>
-              用户管理
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="1-1">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            用户管理
+          </el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="8">
           <template #title>
@@ -137,14 +128,12 @@
             </el-icon>
             <span>系统管理</span>
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="1-1">
-              <el-icon>
-                <CreditCard/>
-              </el-icon>
-              系统管理
-            </el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="1-1">
+            <el-icon>
+              <CreditCard/>
+            </el-icon>
+            系统管理
+          </el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
@@ -154,22 +143,21 @@
         <el-icon class="show" @click="showMenu">
           <Fold/>
         </el-icon>
-        <el-dropdown>
-    <span class="el-dropdown-link">
-      张三
-      <el-icon class="el-icon--right">
-        <arrow-down/>
-      </el-icon>
-    </span>
+
+        <el-dropdown :hide-on-click="false">
+          <span class="el-dropdown-link">
+            {{ user.name }}
+            <el-icon class="el-icon--right"><arrow-down/></el-icon>
+          </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item></el-dropdown-item>
               <el-dropdown-item>我的资料</el-dropdown-item>
               <el-dropdown-item>修改密码</el-dropdown-item>
-              <el-dropdown-item divided>退出登录</el-dropdown-item>
+              <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+
       </el-header>
       <el-main>Main</el-main>
       <el-footer>你所热爱的就是你的生活</el-footer>
@@ -180,6 +168,7 @@
 import {defineComponent} from "vue";
 import {doGet} from "../http/httpRequest.js";
 import {DataAnalysis, Film, Magnet, Notification, OfficeBuilding} from "@element-plus/icons-vue";
+import {messageTip, removeToken} from "../util/util.js";
 
 export default defineComponent({
   name: 'DashboardView',
@@ -187,6 +176,7 @@ export default defineComponent({
   data() {
     return {
       isCollapse: false,
+      user: {},
     };
   },
   mounted() {
@@ -197,8 +187,16 @@ export default defineComponent({
       this.isCollapse = !this.isCollapse;
     },
     loadLoginUser() {
-      doGet("/api/login/info").then((resp) => {
-        console.log(resp.data)
+      doGet("/api/login/info", {}).then((resp) => {
+        console.log(resp)
+        this.user = resp.data.data;
+      })
+    },
+    logout() {
+      doGet("/api/logout", {}).then((response) => {
+        removeToken()
+        messageTip("退出成功", "success")
+        window.location.href = "/";
       })
     },
   }
@@ -208,26 +206,21 @@ export default defineComponent({
 </script>
 <style scoped>
 .el-aside {
-  background: black;
+  background: #1a1a1a;
 }
 
 .el-header {
   background: azure;
-  height: 38px;
-  line-height: 38px;
+  height: 35px;
+  line-height: 35px;
 }
 
 .el-footer {
   background: aliceblue;
-  height: 38px;
-  line-height: 38px;
+  height: 35px;
+  line-height: 35px;
   text-align: center;
 }
-
-.rightContainer {
-  height: calc(100vh);
-}
-
 
 .rightContent {
   height: calc(100vh);
@@ -235,9 +228,9 @@ export default defineComponent({
 
 .menuTitle {
   height: 35px;
-  color: #fff;
-  text-align: center;
   line-height: 35px;
+  color: #f9f9f9;
+  text-align: center;
 }
 
 .show {

@@ -1,5 +1,5 @@
 //从vue-router这个依赖库中导入createRouter()函数, createWebHistory()函数
-import { createRouter, createWebHistory } from "vue-router";
+import {createRouter, createWebHistory} from "vue-router";
 
 //定义一个变量
 let router = createRouter({
@@ -12,34 +12,25 @@ let router = createRouter({
             //路由路径
             path: '/',
             //路由路径所对应的页面
-            component : () => import('../view/LoginView.vue'),
+            component: () => import('../components/LoginView.vue'),
+        },
+        {
+            //路由路径
+            path: '/login',
+            //路由路径所对应的页面
+            component: () => import('../components/LoginView.vue'),
         },
         {
             //路由路径
             path: '/dashboard',
             //路由路径所对应的页面
-            component : () => import('../view/DashboardView.vue'),
-            //子路由
-            children : [
-                {
-                    //路由路径，子路由路径不能以斜杠开头
-                    path: 'user',
-                    //路由路径所对应的页面
-                    component : () => import('../view/UserView.vue'),
-                },
-                {
-                    //路由路径，子路由路径不能以斜杠开头，id是动态变量，这个叫动态路由
-                    path: 'user/:id',
-                    //路由路径所对应的页面
-                    component : () => import('../view/UserDetailView.vue'),
-                }
-            ]
+            component: () => import('../components/DashboardView.vue'),
         },
         {
             //路由路径
             path: '/hello',
             //路由路径所对应的页面
-            component : () => import('../components/HelloWorld.vue'),
+            component: () => import('../components/HelloWorld.vue'),
         }
     ]
 })

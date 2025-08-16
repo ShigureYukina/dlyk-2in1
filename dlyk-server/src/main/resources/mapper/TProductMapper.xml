@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bjpowernode.mapper.TProductMapper">
-  <resultMap id="BaseResultMap" type="com.bjpowernode.model.TProduct">
+<mapper namespace="com.dlyk.mapper.TProductMapper">
+  <resultMap id="BaseResultMap" type="com.dlyk.model.TProduct">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="guide_price_s" jdbcType="DECIMAL" property="guidePriceS" />
@@ -27,7 +27,7 @@
     delete from t_product
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TProduct" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TProduct" useGeneratedKeys="true">
     insert into t_product (`name`, guide_price_s, guide_price_e, 
       quotation, `state`, create_time, 
       create_by, edit_time, edit_by
@@ -37,7 +37,7 @@
       #{createBy,jdbcType=INTEGER}, #{editTime,jdbcType=TIMESTAMP}, #{editBy,jdbcType=INTEGER}
       )
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TProduct" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TProduct" useGeneratedKeys="true">
     insert into t_product
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="name != null">
@@ -98,7 +98,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.bjpowernode.model.TProduct">
+  <update id="updateByPrimaryKeySelective" parameterType="com.dlyk.model.TProduct">
     update t_product
     <set>
       <if test="name != null">
@@ -131,7 +131,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.bjpowernode.model.TProduct">
+  <update id="updateByPrimaryKey" parameterType="com.dlyk.model.TProduct">
     update t_product
     set `name` = #{name,jdbcType=VARCHAR},
       guide_price_s = #{guidePriceS,jdbcType=DECIMAL},

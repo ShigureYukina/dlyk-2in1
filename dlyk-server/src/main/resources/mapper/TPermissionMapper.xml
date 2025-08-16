@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bjpowernode.mapper.TPermissionMapper">
-  <resultMap id="BaseResultMap" type="com.bjpowernode.model.TPermission">
+<mapper namespace="com.dlyk.mapper.TPermissionMapper">
+  <resultMap id="BaseResultMap" type="com.dlyk.model.TPermission">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="code" jdbcType="VARCHAR" property="code" />
@@ -24,7 +24,7 @@
     delete from t_permission
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TPermission" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TPermission" useGeneratedKeys="true">
     insert into t_permission (`name`, code, url, 
       `type`, parent_id, order_no, 
       icon)
@@ -32,7 +32,7 @@
       #{type,jdbcType=VARCHAR}, #{parentId,jdbcType=INTEGER}, #{orderNo,jdbcType=INTEGER}, 
       #{icon,jdbcType=VARCHAR})
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TPermission" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TPermission" useGeneratedKeys="true">
     insert into t_permission
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="name != null">
@@ -81,7 +81,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.bjpowernode.model.TPermission">
+  <update id="updateByPrimaryKeySelective" parameterType="com.dlyk.model.TPermission">
     update t_permission
     <set>
       <if test="name != null">
@@ -108,7 +108,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.bjpowernode.model.TPermission">
+  <update id="updateByPrimaryKey" parameterType="com.dlyk.model.TPermission">
     update t_permission
     set `name` = #{name,jdbcType=VARCHAR},
       code = #{code,jdbcType=VARCHAR},

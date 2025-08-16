@@ -26,10 +26,9 @@ spring:
   #配置redis的连接信息
   data:
     redis:
-      host: localhost
+      host: 127.0.0.1
       port: 6379
       password:
-      database: 1
 
   #设置jackson返回json数据时，时区和格式
   jackson:

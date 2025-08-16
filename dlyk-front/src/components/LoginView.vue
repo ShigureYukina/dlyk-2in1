@@ -38,9 +38,9 @@
 
 <script>
 //从httpRequest.js中导入doPost()函数（.js后缀可以省略）
-import {doPost} from "../http/httpRequest";
+import {doGet, doPost} from "../http/httpRequest";
 import {getTokenName, messageTip, removeToken} from "../util/util.js";
-import router from "../router/index.js";
+import router from "../router/router.js";
 // import {clearToken, jwtName, messageTip} from "../util/utils";
 
 //export default { } 这个语法结构是固定的
@@ -75,7 +75,7 @@ export default {
   //vue的生命周期函数，是一个函数钩子
   mounted() {
     //判断用户是否需要免登录（要不要给用户自动登录）
-    // this.freeLogin();
+    this.freeLogin();
   },
 
   //页面上所有的js函数写在methods属性中
@@ -118,24 +118,24 @@ export default {
     },
 
 
-    //免登录（自动登录）
-    // freeLogin() {
-    //   let token = window.localStorage.getItem(jwtName());
-    //   if (token) { //这个判断和java不一样，它表示token不是空，token有值，token是存在的
-    //     //需要免登录（自动登录），免登录不需要用账号去数据库查询登录，只需要把token发送给后台，后台验证一下token如果是合法的，就自动完成登录
-    //     doGet("/api/freeLogin", {}).then((resp) => { //获取ajax异步请求后的结果
-    //       console.log(resp);
-    //       if (resp.data.code === 200) {
-    //         //可以免登录
-    //         window.location.href = "/dashboard";
-    //       }
-    //     }).catch((error) => { //当发生异常执行该catch函数
-    //       console.log(error);
-    //     }).finally(() => { //总是会执行
-    //       // 总是会执行
-    //     });
-    //   }
-    // }
+    // 免登录（自动登录）
+    freeLogin() {
+      let token = window.localStorage.getItem(getTokenName());
+      if (token) { //这个判断和java不一样，它表示token不是空，token有值，token是存在的
+        //需要免登录（自动登录），免登录不需要用账号去数据库查询登录，只需要把token发送给后台，后台验证一下token如果是合法的，就自动完成登录
+        doGet("/api/login/free", {}).then((resp) => { //获取ajax异步请求后的结果
+          console.log(resp);
+          if (resp.data.code === 200) {
+            //可以免登录
+            window.location.href = "/dashboard";
+          }
+        }).catch((error) => { //当发生异常执行该catch函数
+          console.log(error);
+        }).finally(() => { //总是会执行
+          // 总是会执行
+        });
+      }
+    }
   }
 }
 </script>

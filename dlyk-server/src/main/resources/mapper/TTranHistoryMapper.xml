@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.bjpowernode.mapper.TTranHistoryMapper">
-  <resultMap id="BaseResultMap" type="com.bjpowernode.model.TTranHistory">
+<mapper namespace="com.dlyk.mapper.TTranHistoryMapper">
+  <resultMap id="BaseResultMap" type="com.dlyk.model.TTranHistory">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="tran_id" jdbcType="INTEGER" property="tranId" />
     <result column="stage" jdbcType="INTEGER" property="stage" />
@@ -23,7 +23,7 @@
     delete from t_tran_history
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TTranHistory" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TTranHistory" useGeneratedKeys="true">
     insert into t_tran_history (tran_id, stage, money, 
       expected_date, create_time, create_by
       )
@@ -31,7 +31,7 @@
       #{expectedDate,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=INTEGER}
       )
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TTranHistory" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TTranHistory" useGeneratedKeys="true">
     insert into t_tran_history
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="tranId != null">
@@ -74,7 +74,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.bjpowernode.model.TTranHistory">
+  <update id="updateByPrimaryKeySelective" parameterType="com.dlyk.model.TTranHistory">
     update t_tran_history
     <set>
       <if test="tranId != null">
@@ -98,7 +98,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.bjpowernode.model.TTranHistory">
+  <update id="updateByPrimaryKey" parameterType="com.dlyk.model.TTranHistory">
     update t_tran_history
     set tran_id = #{tranId,jdbcType=INTEGER},
       stage = #{stage,jdbcType=INTEGER},
