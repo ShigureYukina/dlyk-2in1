@@ -1,55 +1,95 @@
 package org.example.dlykserver.config;
 
+
+import jakarta.annotation.Resource;
+import org.example.dlykserver.config.fitter.TokenVerifyFilter;
 import org.example.dlykserver.config.handler.MyAuthenticationFailureHandler;
 import org.example.dlykserver.config.handler.MyAuthenticationSuccessHandler;
+import org.example.dlykserver.config.handler.MyLogoutSuccessHandler;
+import org.example.dlykserver.contant.Constants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-
-@EnableWebSecurity
 @Configuration
 public class SecurityConfig {
-    @Bean
+
+    @Resource
+    private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
+
+    @Resource
+    private MyAuthenticationFailureHandler myAuthenticationFailureHandler;
+
+    @Resource
+    private MyLogoutSuccessHandler myLogoutSuccessHandler;
+
+    @Resource
+    private TokenVerifyFilter tokenVerifyFilter;
+
+    @Bean //There is no PasswordEncoder mapped for the id "null"
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(c -> c.configurationSource(configurationSource())) // 确保 CORS 配置优先
-                .csrf().disable() // 如果不需要 CSRF 保护，可以禁用
-                .formLogin(formLogin -> {
-                    formLogin.loginProcessingUrl("/api/login")
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CorsConfigurationSource configurationSource) throws Exception {
+        //禁用跨站请求伪造
+        return httpSecurity
+                .formLogin((formLogin) -> {
+                    formLogin.loginProcessingUrl(Constants.LOGIN_URI) //登录处理地址，不需要写Controller
                             .usernameParameter("loginAct")
                             .passwordParameter("loginPwd")
-                            .successHandler(new MyAuthenticationSuccessHandler())
-                            .failureHandler(new MyAuthenticationFailureHandler());
+                            .successHandler(myAuthenticationSuccessHandler)
+                            .failureHandler(myAuthenticationFailureHandler);
                 })
-                .authorizeHttpRequests(authorize -> {
+
+                .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers("/api/login").permitAll()
-                            .anyRequest().authenticated();
+                            .anyRequest().authenticated(); //其它任何请求都需要登录后才能访问
                 })
+
+                .csrf(AbstractHttpConfigurer::disable) //方法引用，禁用跨站请求伪造
+
+                //支持跨域请求
+                .cors((cors) -> {
+                    cors.configurationSource(configurationSource);
+                })
+
+                .sessionManagement((session) -> {
+                    //session创建策略
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS); // 无session状态，也就是禁用session
+                })
+
+                //添加自定义的Filter
+                .addFilterBefore(tokenVerifyFilter, LogoutFilter.class)
+
+                //退出登录
+                .logout((logout) -> {
+                    logout.logoutUrl("/api/logout") //退出提交到该地址，该地址不需要我们写controller的，是框架处理
+                            .logoutSuccessHandler(myLogoutSuccessHandler);
+                })
+
                 .build();
     }
 
     @Bean
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081/")); // 生产环境中应限制来源
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 指定允许的方法
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true); // 允许发送 Cookie
+        configuration.setAllowedOrigins(Arrays.asList("*")); //允许任何来源，http://localhost:8081
+        configuration.setAllowedMethods(Arrays.asList("*")); //允许任何请求方法，post、get、put、delete
+        configuration.setAllowedHeaders(Arrays.asList("*")); //允许任何的请求头
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

@@ -159,4 +159,10 @@ public class TUser implements UserDetails, Serializable {
     public boolean isEnabled() {
         return this.getAccountEnabled() == 1;
     }
+
+    @JsonIgnore
+    public List getStringRoleList() {
+        return this.roleList.stream().toList();
+    }
+
 }

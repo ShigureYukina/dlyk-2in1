@@ -20,13 +20,14 @@ public enum CodeEnum {
     FAIL(500, "失败"),
 
 
-    LOGIN_JWT_IS_EMPTY(901, "请求jwt为空"),
+    TOKEN_IS_EMPTY(901, "请求TOKEN为空"),
 
-    LOGIN_JWT_IS_ILLEGAL(902, "请求jwt不合法"),
+    TOKEN_IS_EXPIRED(902, "请求TOKEN已过期"),
 
-    LOGIN_JWT_IS_EXPIRE(903, "请求jwt已过期"),
+    Token_IS_ERROR(903, "请求TOKEN错误"),
 
-    LOGIN_JWT_NO_MATCH(904, "请求jwt不正确")
+    TOKEN_IS_NONE_MATCH(904, "请求TOKEN不匹配"),
+
     ;
 
     @Getter

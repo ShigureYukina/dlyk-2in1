@@ -26,7 +26,7 @@
             <el-button type="primary" @click="login">登 录</el-button>
           </el-form-item>
           <el-form-item>
-            <el-checkbox value="Online activities" name="rememberMe">
+            <el-checkbox value="Online activities" v-model="user.rememberMe">
               记住我
             </el-checkbox>
           </el-form-item>
@@ -39,7 +39,8 @@
 <script>
 //从httpRequest.js中导入doPost()函数（.js后缀可以省略）
 import {doPost} from "../http/httpRequest";
-import {messageTip} from "../util/util.js";
+import {getTokenName, messageTip, removeToken} from "../util/util.js";
+import router from "../router/index.js";
 // import {clearToken, jwtName, messageTip} from "../util/utils";
 
 //export default { } 这个语法结构是固定的
@@ -81,29 +82,41 @@ export default {
   methods: {
     //登录函数
     login() {
-      //验证表单
+      // 验证表单
       this.$refs.loginRefForm.validate((valid) => {
-        if (valid) { //valid是true表示验证通过了
-          //既然去登录，那么把浏览器之前存放的token都删除一下
-          let formData = new FormData(); //js对象
+        if (valid) { // valid 是 true 表示验证通过了
+          // 既然去登录，那么把浏览器之前存放的 token 都删除一下
+          let formData = new FormData(); // js 对象
           formData.append("loginAct", this.user.loginAct);
           formData.append("loginPwd", this.user.loginPwd);
-          doPost('/api/login', formData).then((response) => { //获取ajax异步请求后的结果
+          formData.append("rememberMe", this.user.rememberMe);
+
+          doPost('/api/login', formData).then((response) => { // 获取 ajax 异步请求后的结果
             console.log(response.data.data);
             if (response.data.code === 200) {
-              //可以登录
-              messageTip("登录成功", "success")
+              // 可以登录
+              messageTip("登录成功", "success");
+              // 清除 token
+              removeToken();
+
+              // 把 token 存放到浏览器本地存储中
+              if (this.user.rememberMe === true) {
+                window.localStorage.setItem(getTokenName(), response.data.data); // 修正这里
+              } else {
+                window.sessionStorage.setItem(getTokenName(), response.data.data); // 修正这里
+              }
+              router.push("/dashboard"); // 跳转到首页
 
             } else {
-              messageTip("登录失败", "error")
+              messageTip("登录失败", "error");
             }
-          }).catch((error) => { //当发生异常执行该catch函数
+          }).catch((error) => { // 当发生异常执行该 catch 函数
             console.log(error);
-
-          })
+          });
         }
-      })
+      });
     },
+
 
     //免登录（自动登录）
     // freeLogin() {

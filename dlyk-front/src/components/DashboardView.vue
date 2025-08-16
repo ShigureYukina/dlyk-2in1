@@ -154,6 +154,22 @@
         <el-icon class="show" @click="showMenu">
           <Fold/>
         </el-icon>
+        <el-dropdown>
+    <span class="el-dropdown-link">
+      张三
+      <el-icon class="el-icon--right">
+        <arrow-down/>
+      </el-icon>
+    </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item></el-dropdown-item>
+              <el-dropdown-item>我的资料</el-dropdown-item>
+              <el-dropdown-item>修改密码</el-dropdown-item>
+              <el-dropdown-item divided>退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </el-header>
       <el-main>Main</el-main>
       <el-footer>你所热爱的就是你的生活</el-footer>
@@ -162,17 +178,28 @@
 </template>
 <script>
 import {defineComponent} from "vue";
+import {doGet} from "../http/httpRequest.js";
+import {DataAnalysis, Film, Magnet, Notification, OfficeBuilding} from "@element-plus/icons-vue";
 
 export default defineComponent({
   name: 'DashboardView',
+  components: {Film, Magnet, DataAnalysis, Notification, OfficeBuilding},
   data() {
     return {
       isCollapse: false,
     };
   },
+  mounted() {
+    this.loadLoginUser()
+  },
   methods: {
     showMenu() {
       this.isCollapse = !this.isCollapse;
+    },
+    loadLoginUser() {
+      doGet("/api/login/info").then((resp) => {
+        console.log(resp.data)
+      })
     },
   }
 });
@@ -183,17 +210,20 @@ export default defineComponent({
 .el-aside {
   background: black;
 }
+
 .el-header {
   background: azure;
   height: 38px;
   line-height: 38px;
 }
+
 .el-footer {
   background: aliceblue;
   height: 38px;
   line-height: 38px;
   text-align: center;
 }
+
 .rightContainer {
   height: calc(100vh);
 }
@@ -212,5 +242,10 @@ export default defineComponent({
 
 .show {
   cursor: pointer;
+}
+
+.el-dropdown {
+  float: right;
+  line-height: 35px;
 }
 </style>
