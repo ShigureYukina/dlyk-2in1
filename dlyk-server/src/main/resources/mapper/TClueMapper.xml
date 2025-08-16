@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="org.example.dlykserver.mapper.TClueMapper">
-  <resultMap id="BaseResultMap" type="org.example.dlykserver.model.TClue">
+<mapper namespace="com.bjpowernode.mapper.TClueMapper">
+  <resultMap id="BaseResultMap" type="com.bjpowernode.model.TClue">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="owner_id" jdbcType="INTEGER" property="ownerId" />
     <result column="activity_id" jdbcType="INTEGER" property="activityId" />
@@ -42,7 +42,7 @@
     delete from t_clue
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="org.example.dlykserver.model.TClue" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TClue" useGeneratedKeys="true">
     insert into t_clue (owner_id, activity_id, full_name, 
       appellation, phone, weixin, 
       qq, email, age, job, 
@@ -60,7 +60,7 @@
       #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=INTEGER}, #{editTime,jdbcType=TIMESTAMP}, 
       #{editBy,jdbcType=INTEGER})
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="org.example.dlykserver.model.TClue" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.bjpowernode.model.TClue" useGeneratedKeys="true">
     insert into t_clue
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="ownerId != null">
@@ -205,7 +205,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="org.example.dlykserver.model.TClue">
+  <update id="updateByPrimaryKeySelective" parameterType="com.bjpowernode.model.TClue">
     update t_clue
     <set>
       <if test="ownerId != null">
@@ -280,7 +280,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="org.example.dlykserver.model.TClue">
+  <update id="updateByPrimaryKey" parameterType="com.bjpowernode.model.TClue">
     update t_clue
     set owner_id = #{ownerId,jdbcType=INTEGER},
       activity_id = #{activityId,jdbcType=INTEGER},
