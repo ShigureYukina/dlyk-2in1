@@ -1,7 +1,6 @@
 package com.dlyk.config;
 
 
-
 import com.dlyk.config.filter.TokenVerifyFilter;
 import com.dlyk.config.handler.MyAuthenticationFailureHandler;
 import com.dlyk.config.handler.MyAuthenticationSuccessHandler;
@@ -47,23 +46,23 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CorsConfigurationSource configurationSource) throws Exception {
         //禁用跨站请求伪造
         return httpSecurity
-                .formLogin( (formLogin) -> formLogin.loginProcessingUrl(Constants.LOGIN_URI) //登录处理地址，不需要写Controller
+                .formLogin((formLogin) -> formLogin.loginProcessingUrl(Constants.LOGIN_URI) //登录处理地址，不需要写Controller
                         .usernameParameter("loginAct")
                         .passwordParameter("loginPwd")
                         .successHandler(myAuthenticationSuccessHandler)
                         .failureHandler(myAuthenticationFailureHandler))
 
-                .authorizeHttpRequests( (authorize) -> {
+                .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers("/api/login").permitAll()
                             .anyRequest().authenticated(); //其它任何请求都需要登录后才能访问
                 })
 
-                .csrf(AbstractHttpConfigurer:: disable) //方法引用，禁用跨站请求伪造
+                .csrf(AbstractHttpConfigurer::disable) //方法引用，禁用跨站请求伪造
 
                 //支持跨域请求
-                .cors( (cors) -> cors.configurationSource(configurationSource))
+                .cors((cors) -> cors.configurationSource(configurationSource))
 
-                .sessionManagement( (session) -> {
+                .sessionManagement((session) -> {
                     //session创建策略
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS); // 无session状态，也就是禁用session
                 })

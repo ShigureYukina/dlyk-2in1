@@ -6,11 +6,12 @@
           background-color="#334157"
           text-color="white"
           style=" border-right: solid 0;"
-          :unique-opened="true"
           @open="handleOpen"
           @close="handleClose"
           :collapse="isCollapse"
           :collapse-transition="false"
+          :router="true"
+          :unique-opened="true"
       >
         <el-sub-menu index="1">
           <template #title>
@@ -32,6 +33,7 @@
             市场统计
           </el-menu-item>
         </el-sub-menu>
+
         <el-sub-menu index="2">
           <template #title>
             <el-icon>
@@ -48,6 +50,7 @@
           </el-menu-item>
 
         </el-sub-menu>
+
         <el-sub-menu index="3">
           <template #title>
             <el-icon>
@@ -64,6 +67,7 @@
           </el-menu-item>
 
         </el-sub-menu>
+
         <el-sub-menu index="4">
           <template #title>
             <el-icon>
@@ -79,6 +83,7 @@
             交易管理
           </el-menu-item>
         </el-sub-menu>
+
         <el-sub-menu index="5">
           <template #title>
             <el-icon>
@@ -93,6 +98,7 @@
             产品管理
           </el-menu-item>
         </el-sub-menu>
+
         <el-sub-menu index="6">
           <template #title>
             <el-icon>
@@ -107,6 +113,7 @@
             字典管理
           </el-menu-item>
         </el-sub-menu>
+
         <el-sub-menu index="7">
           <template #title>
             <el-icon>
@@ -114,13 +121,14 @@
             </el-icon>
             <span>用户管理</span>
           </template>
-          <el-menu-item index="1-1">
+          <el-menu-item index="/dashboard/user">
             <el-icon>
               <CreditCard/>
             </el-icon>
             用户管理
           </el-menu-item>
         </el-sub-menu>
+
         <el-sub-menu index="8">
           <template #title>
             <el-icon>
@@ -159,7 +167,9 @@
         </el-dropdown>
 
       </el-header>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view v-if="isRouteActive"/>
+      </el-main>
       <el-footer>你所热爱的就是你的生活</el-footer>
     </el-container>
   </el-container>
@@ -171,36 +181,56 @@ import {DataAnalysis, Film, Magnet, Notification, OfficeBuilding} from "@element
 import {messageTip, removeToken} from "../util/util.js";
 
 export default defineComponent({
-  name: 'DashboardView',
-  components: {Film, Magnet, DataAnalysis, Notification, OfficeBuilding},
-  data() {
-    return {
-      isCollapse: false,
-      user: {},
-    };
-  },
-  mounted() {
-    this.loadLoginUser()
-  },
-  methods: {
-    showMenu() {
-      this.isCollapse = !this.isCollapse;
-    },
-    loadLoginUser() {
-      doGet("/api/login/info", {}).then((resp) => {
-        console.log(resp)
-        this.user = resp.data.data;
-      })
-    },
-    logout() {
-      doGet("/api/logout", {}).then((response) => {
-        removeToken()
-        messageTip("退出成功", "success")
-        window.location.href = "/";
-      })
-    },
-  }
-});
+      name: 'DashboardView',
+      components: {Film, Magnet, DataAnalysis, Notification, OfficeBuilding},
+      data() {
+        return {
+          isCollapse: false,
+          user: {},
+          isRouteActive: true ,
+        };
+      },
+      provide() {
+        return {
+          reload: () => {
+            this.isRouteActive = false;
+            this.$nextTick(() => {
+              {
+                this.isRouteActive = true;
+              }
+            })
+          },
+        }
+      },
+
+
+      mounted() {
+        this.loadLoginUser()
+      }
+      ,
+      methods: {
+        showMenu() {
+          this.isCollapse = !this.isCollapse;
+        }
+        ,
+        loadLoginUser() {
+          doGet("/api/login/info", {}).then((resp) => {
+            this.user = resp.data.data;
+          })
+        }
+        ,
+        logout() {
+          doGet("/api/logout", {}).then((response) => {
+            removeToken()
+            messageTip("退出成功", "success")
+            window.location.href = "/";
+          })
+        }
+        ,
+      }
+    }
+)
+;
 
 
 </script>

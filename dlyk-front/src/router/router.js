@@ -25,6 +25,20 @@ let router = createRouter({
             path: '/dashboard',
             //路由路径所对应的页面
             component: () => import('../components/DashboardView.vue'),
+            children: [
+                {
+                    //子路由路径
+                    path: 'user',
+                    //子路由路径所对应的页面
+                    component: () => import('../components/UserView.vue'),
+                },
+                {
+                    //子路由路径,id是动态参数
+                    path:'user/:id',
+                    component: () => import('../components/UserDetailView.vue'),
+
+                }
+            ]
         },
         {
             //路由路径

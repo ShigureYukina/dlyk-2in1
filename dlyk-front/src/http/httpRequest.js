@@ -2,6 +2,7 @@
 import axios from "axios";
 import {getTokenName, messageConfirm, messageTip, removeToken} from "../util/util.js";
 
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 //定义后端接口地址的前缀
 axios.defaults.baseURL = "http://localhost:8089";
 
@@ -9,7 +10,7 @@ export function doGet(url, params) {
     return axios({
         method: "get",
         url: url,
-        params: params, //{name: "对的", age: 22},
+        params: params,
         dataType: "json"
     })
 }
