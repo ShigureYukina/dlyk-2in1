@@ -21,22 +21,22 @@
     </el-form-item>
 
     <el-form-item label="账号启用">
-      <el-tag v-if="userdetail.accountEnabled === 1" type="success">启用</el-tag>
+      <el-tag v-if="userdetail.accountEnabled == 1" type="success">启用</el-tag>
       <el-tag v-else type="danger">禁用</el-tag>
     </el-form-item>
 
     <el-form-item label="账号未过期">
-      <el-tag v-if="userdetail.accountNoExpired === 1" type="success">未过期</el-tag>
+      <el-tag v-if="userdetail.accountNoExpired == 1" type="success">未过期</el-tag>
       <el-tag v-else type="danger">已过期</el-tag>
     </el-form-item>
 
     <el-form-item label="账号未锁定">
-      <el-tag v-if="userdetail.accountNoLocked === 1" type="success">未锁定</el-tag>
+      <el-tag v-if="userdetail.accountNoLocked == 1" type="success">未锁定</el-tag>
       <el-tag v-else type="danger">已锁定</el-tag>
     </el-form-item>
 
     <el-form-item label="凭证未过期">
-      <el-tag v-if="userdetail.credentialsNoExpired === 1" type="success">未过期</el-tag>
+      <el-tag v-if="userdetail.credentialsNoExpired == 1" type="success">未过期</el-tag>
       <el-tag v-else type="danger">已过期</el-tag>
     </el-form-item>
 
@@ -70,7 +70,7 @@ export default defineComponent({
   methods: {
     loadUserDetail() {
       let id = this.$route.params.id;
-      doGet('/api/users/id', {id: id}).then(res => {
+      doGet('/api/user/', {id: id}).then(res => {
         console.log(res.data.data);
         this.userdetail = res.data.data;
       });

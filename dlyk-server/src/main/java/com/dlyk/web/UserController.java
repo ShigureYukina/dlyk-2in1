@@ -51,17 +51,29 @@ public class UserController {
         return R.OK(pageInfo);
     }
 
-    @GetMapping(value = "/api/users/id")
+    @GetMapping(value = "/api/user/")
     public R userDetail(@RequestParam(value = "id") Integer id) {
         TUser tUser = userService.getUserById(id);
         return R.OK(tUser);
     }
 
-@PostMapping(value = "/api/user")
-public R saveUser(UserQuery userQuery, @RequestHeader(value = "Authorization") String token) {
-    System.out.println("Received token: " + token);  // 打印token到控制台
-    userQuery.setToken(token);
-    int result = userService.saveUser(userQuery);
-    return result >= 1 ? R.OK() : R.FAIL();
-}
+    @PostMapping(value = "/api/user")
+    public R saveUser(UserQuery userQuery, @RequestHeader(value = "Authorization") String token) {
+        userQuery.setToken(token);
+        int result = userService.saveUser(userQuery);
+        return result >= 1 ? R.OK() : R.FAIL();
+    }
+
+    @PutMapping(value = "/api/user")
+    public R updateUser(UserQuery userQuery, @RequestHeader(value = "Authorization") String token) {
+        userQuery.setToken(token);
+        int result = userService.updateUser(userQuery);
+        return result >= 1 ? R.OK() : R.FAIL();
+    }
+
+    @DeleteMapping(value = "/api/user/{id}")
+    public R deleteUser(@PathVariable(value = "id") Integer id) {
+        int del = userService.deleteUser(id);
+        return del >= 1 ? R.OK() : R.FAIL();
+    }
 }

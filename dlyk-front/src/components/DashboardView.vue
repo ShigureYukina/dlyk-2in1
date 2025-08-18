@@ -187,7 +187,7 @@ export default defineComponent({
         return {
           isCollapse: false,
           user: {},
-          isRouteActive: true ,
+          isRouteActive: true,
         };
       },
       provide() {

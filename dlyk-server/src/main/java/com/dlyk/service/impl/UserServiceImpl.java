@@ -8,6 +8,7 @@ import com.dlyk.service.UserService;
 import com.dlyk.util.JWTUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -70,5 +71,27 @@ public class UserServiceImpl implements UserService {
         tUser.setCreateBy(userId);//设置创建人
 
         return tUserMapper.insertSelective(tUser);
+    }
+
+    @Override
+    public int updateUser(UserQuery userQuery) {
+
+        TUser tUser = new TUser();
+
+        //把UserQuery对象里面的属性数据复制到TUser对象里面去(复制要求：两个对象的属性名相同，属性类型要相同，这样才能复制)
+        BeanUtils.copyProperties(userQuery, tUser);
+        if (StringUtils.isNotEmpty(userQuery.getLoginPwd())) {
+            tUser.setLoginPwd(passwordEncoder.encode(userQuery.getLoginPwd()));
+        }
+
+        tUser.setEditTime(new Date());//设置创建时间
+        Integer userId = JWTUtils.parseUserFromJWT(userQuery.getToken()).getId();
+        tUser.setEditBy(userId);//设置创建人
+
+        return tUserMapper.updateByPrimaryKeySelective(tUser);
+    }
+    @Override
+    public int deleteUser(Integer id) {
+        return tUserMapper.deleteByPrimaryKey(id);
     }
 }

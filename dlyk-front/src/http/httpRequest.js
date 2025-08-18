@@ -16,44 +16,30 @@ export function doGet(url, params) {
 }
 
 export function doPost(url, data) {
-    return axios({
-        method: "post",
-        url: url,
-        data: data, //{name: "好的呢", age: 22},
-        dataType: "json"
-    })
+    return axios.post(url, data)
+        .then(response => response)
+        .catch(error => {
+            console.error("POST请求失败:", error);
+            throw error; // 确保错误能够被捕获
+        });
 }
 
 export function doPut(url, data) {
-    axios({
-        method: "put",
-        url: url,
-        data: data, //{name:"好的呢", age: 22},
-        dataType: "json"
-    }).then(function (rep) {
-        // rep.data = [{"name":"李四","age":22},{"name":"张三","age":23},{"name":"王五","age":24}]
-        var s = "";
-        rep.data.forEach(function (stu) {
-            s += stu.name + "--------------" + stu.age + "<br>";
+    return axios.put(url, data)
+        .then(response => response)
+        .catch(error => {
+            console.error("PUT请求失败:", error);
+            throw error; // 确保错误能够被捕获
         });
-        document.getElementById("mydiv").innerHTML = s;
-    })
 }
 
-export function doDelete(url, params) {
-    axios({
-        method: "delete",
-        url: url,
-        params: params, //{name: "对的", age: 22},
-        dataType: "json"
-    }).then(function (rep) {
-        // rep.data = [{"name":"李四","age":22},{"name":"张三","age":23},{"name":"王五","age":24}]
-        var s = "";
-        rep.data.forEach(function (stu) {
-            s += stu.name + "--------------" + stu.age + "<br>";
+export function doDelete(url, data) {
+    return axios.delete(url, {data}) // axios.delete 返回一个 Promise
+        .then(response => response)
+        .catch(error => {
+            console.error("DELETE请求失败:", error);
+            throw error; // 确保错误能够被捕获
         });
-        document.getElementById("mydiv").innerHTML = s;
-    })
 }
 
 
