@@ -88,6 +88,13 @@
     delete from t_user
     where id = #{id,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteByIds" parameterType="java.util.List">
+      delete from t_user
+      where id in
+      <foreach collection="idList" item="id" open="(" separator="," close=")">
+          #{id,jdbcType=INTEGER}
+      </foreach>
+  </delete>
 
   <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TUser" useGeneratedKeys="true">
     insert into t_user (login_act, login_pwd, `name`, 

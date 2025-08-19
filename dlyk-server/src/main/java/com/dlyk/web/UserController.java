@@ -9,6 +9,9 @@ import jakarta.annotation.Resource;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 public class UserController {
 
@@ -75,5 +78,12 @@ public class UserController {
     public R deleteUser(@PathVariable(value = "id") Integer id) {
         int del = userService.deleteUser(id);
         return del >= 1 ? R.OK() : R.FAIL();
+    }
+
+    @DeleteMapping(value = "/api/user/batch")
+    public R batchdeleteUser(@RequestParam(value = "ids") String ids) {
+        List<String> idList = Arrays.asList(ids.split(","));
+        int Batchdel = userService.batchdeleteUserByIds(idList);
+        return Batchdel >= 1 ? R.OK() : R.FAIL();
     }
 }

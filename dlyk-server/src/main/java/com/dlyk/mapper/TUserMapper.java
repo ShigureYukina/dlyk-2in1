@@ -23,4 +23,6 @@ public interface TUserMapper {
     List<TUser> selectUserByPage();
 
     TUser selectDetailById(Integer id);
+
+    int deleteByIds(List<String> idList);
 }

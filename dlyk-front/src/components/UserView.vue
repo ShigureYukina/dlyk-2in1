@@ -1,6 +1,6 @@
 <template>
   <el-button type="primary" @click="add()">添加用户</el-button>
-  <el-button type="danger">批量删除</el-button>
+  <el-button type="danger" @click="batchDel()">批量删除</el-button>
   <el-table
       ref="multipleTableRef"
       :data="userlist"
@@ -99,6 +99,7 @@ export default defineComponent({
       UserdialogVisible: false,
       // 登录表单
       userQuery: {},
+      userIdArr: [],
       userRules: {
         loginAct: [
           {required: true, message: '请输入账号', trigger: 'blur'},
@@ -139,7 +140,12 @@ export default defineComponent({
     this.getData(1);
   },
   methods: {
-    handleSelectionChange() {
+    handleSelectionChange(selectionDataArray) {
+      this.userIdArr = [];
+      selectionDataArray.forEach(data => {
+        let userId = data.id;
+        this.userIdArr.push(userId);
+      })
     },
 
     getData(current) {
@@ -185,6 +191,24 @@ export default defineComponent({
           this.$message.error("删除用户失败");
         });
       });
+    },
+    batchDel() {
+      if (this.userIdArr.length <= 0) {
+        messageTip("请选择要删除的用户", "warning")
+        return
+      }
+      messageConfirm("你确定要批量删除选中的用户吗？").then(() => {
+        let ids = this.userIdArr.join(",");
+        // 将ids作为查询参数传递
+        doDelete(`/api/user/batch?ids=${ids}`).then(response => {
+          if (response.data.code === 200) {
+            messageTip("批量删除用户成功", "success");
+            this.reload(); // 刷新用户列表
+          } else {
+            messageTip("批量删除用户失败,原因:" + response.data.msg, "error"); // 使用 messageTip 保持一致性
+          }
+        })
+      })
     },
 
 
