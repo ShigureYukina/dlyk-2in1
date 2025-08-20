@@ -37,6 +37,11 @@ let router = createRouter({
                     path:'user/:id',
                     component: () => import('../components/UserDetailView.vue'),
 
+                },
+                {
+                    //子路由路径
+                    path:'activity',
+                    component: () => import('../components/ActivityView.vue'),
                 }
             ]
         },

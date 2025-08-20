@@ -1,8 +1,12 @@
 package com.dlyk.service.impl;
 
 import com.dlyk.constant.Constants;
+import com.dlyk.mapper.TRoleMapper;
 import com.dlyk.mapper.TUserMapper;
+import com.dlyk.mapper.TUserRoleMapper;
+import com.dlyk.model.TRole;
 import com.dlyk.model.TUser;
+import com.dlyk.query.BaseQuery;
 import com.dlyk.query.UserQuery;
 import com.dlyk.service.UserService;
 import com.dlyk.util.JWTUtils;
@@ -16,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,25 +30,39 @@ public class UserServiceImpl implements UserService {
     @Resource
     private TUserMapper tUserMapper;
     @Resource
+    private TRoleMapper tRoleMapper;
+    @Resource
     private PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
+        //这里面去数据库查询一下用户即可
         TUser tUser = tUserMapper.selectByLoginAct(username);
         if (tUser == null) {
             throw new UsernameNotFoundException("登录账号不存在");
         }
 
+        //查询一下用户的角色
+        List<TRole> tRoleList = tRoleMapper.selectByUserId(tUser.getId());
+
+        List<String> stringRoleList = new ArrayList<>();
+
+        tRoleList.forEach(tRole -> {
+            if (org.springframework.util.StringUtils.hasText(tRole.getRole())) {
+                stringRoleList.add(tRole.getRole());
+            }
+        });
+        tUser.setRoleList(stringRoleList);
         return tUser;
     }
+
 
     @Override
     public PageInfo<TUser> getUserByPage(Integer current) {
         // 1.设置PageHelper
         PageHelper.startPage(current, Constants.PAGE_SIZE);
         // 2.查询
-        List<TUser> list = tUserMapper.selectUserByPage();
+        List<TUser> list = tUserMapper.selectUserByPage(BaseQuery.builder().build());
         // 3.封装分页数据到PageInfo
         PageInfo<TUser> info = new PageInfo<>(list);
         return info;

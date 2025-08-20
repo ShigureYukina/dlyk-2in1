@@ -1,6 +1,9 @@
 package com.dlyk.mapper;
 
+import com.dlyk.model.TRole;
 import com.dlyk.model.TUserRole;
+
+import java.util.List;
 
 public interface TUserRoleMapper {
     int deleteByPrimaryKey(Integer id);
@@ -14,4 +17,5 @@ public interface TUserRoleMapper {
     int updateByPrimaryKeySelective(TUserRole record);
 
     int updateByPrimaryKey(TUserRole record);
+
 }

@@ -1,6 +1,8 @@
 package com.dlyk.mapper;
 
+import com.dlyk.commons.DataScope;
 import com.dlyk.model.TUser;
+import com.dlyk.query.BaseQuery;
 
 import java.util.List;
 
@@ -20,7 +22,8 @@ public interface TUserMapper {
 
     TUser selectByLoginAct(String username);
 
-    List<TUser> selectUserByPage();
+    @DataScope(tableAlias = "tu", tableField = "id")
+    List<TUser> selectUserByPage(BaseQuery baseQuery);
 
     TUser selectDetailById(Integer id);
 
