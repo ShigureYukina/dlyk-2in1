@@ -90,6 +90,11 @@
         where id = #{id, jdbcType=INTEGER}
     </select>
 
+    <select id="selectByOwner" resultMap="BaseResultMap">
+        select id,name
+        from t_user
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         delete
         from t_user

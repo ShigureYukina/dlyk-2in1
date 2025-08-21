@@ -1,36 +1,40 @@
 <template>
-  <el-form :inline="true" :model="activityQuery" class="demo-form-inline">
+  <el-form :inline="true" :model="activityQuery" class="demo-form-inline" :rules="activityQueryRules">
 
     <el-form-item label="负责人">
       <el-select
           v-model="activityQuery.ownerId"
           placeholder="请选择负责人"
+          @click="loadOwner"
           clearable
       >
-        <el-option label="Zone one" value="shanghai"/>
-        <el-option label="Zone two" value="beijing"/>
+
+        <el-option v-for="item in ownerOptions"
+                   :key="item.id"
+                   :label="item.name"
+                   :value="item.id"/>
       </el-select>
     </el-form-item>
 
     <el-form-item label="活动名称">
-      <el-input v-model="activityQuery.user" placeholder="请输入活动名称" clearable/>
+      <el-input v-model="activityQuery.name" placeholder="请输入活动名称" clearable/>
     </el-form-item>
 
-    <el-form-item label="Activity time">
+    <el-form-item label="活动时间">
       <div class="block">
         <el-date-picker
-            v-model="activityQuery.startTime"
+            v-model="activityQuery.activityTime"
             type="datetimerange"
             start-placeholder="开始时间"
             end-placeholder="结束时间"
-            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
             date-format="YYYY/MM/DD ddd"
             time-format="A hh:mm:ss"
         />
       </div>
     </el-form-item>
 
-    <el-form-item label="活动预算">
+    <el-form-item label="活动预算" prop="cost">
       <el-input v-model="activityQuery.cost" placeholder="请输入活动预算" clearable/>
     </el-form-item>
 
@@ -39,6 +43,7 @@
           v-model="activityQuery.createTime"
           type="datetime"
           placeholder="请选择创建时间"
+          value-format="YYYY-MM-DD HH:mm:ss"
       />
     </el-form-item>
 
@@ -96,6 +101,15 @@ export default defineComponent({
       //分页数据
       pagesize: 10,
       total: 0,
+      //负责人下拉框数据
+      ownerOptions: [{}],
+      activityTime: [], // 确保初始化为数组
+      activityQueryRules: {
+        cost: [
+          {pattern: /^[0-9]+(\.[0-9]{2})*?$/, message: '活动预算必须是整数或最多两位小数', trigger: 'blur'}
+        ],
+
+      }
     }
   },
   mounted() {
@@ -103,19 +117,51 @@ export default defineComponent({
   },
   methods: {
     getData(current) {
-      doGet("/api/activitys", {current: current}).then(response => {
+      let startTime = '';
+      let endTime = '';
+      for (let key in this.activityQuery.activityTime) {
+        if (key === '0') {
+          startTime = this.activityQuery.activityTime[key];
+        }
+        if (key === '1') {
+          endTime = this.activityQuery.activityTime[key];
+        }
+      }
+      doGet("/api/activitys", {
+        current: current,
+        ownerId: this.activityQuery.ownerId,
+        startTime: startTime,
+        endTime: endTime,
+        createTime: this.activityQuery.createTime,
+        cost: this.activityQuery.cost,
+        name: this.activityQuery.name,
+      }).then(response => {
         if (response.data.code === 200) {
           this.activitylist = response.data.data.list;
           this.pagesize = response.data.data.pageSize;
           this.total = response.data.data.total;
         }
       })
-    },
+    }
+    ,
     toPage(current) {
       this.getData(current);
-    },
+    }
+    ,
+    loadOwner() {
+      doGet("/api/owner", {}).then(response => {
+        if (response.data.code === 200) {
+          this.ownerOptions = response.data.data;
+        }
+      })
+    }
+    ,
+    onSearch() {
+      this.getData(1);
+    }
+
   }
-});
+})
 
 
 </script>
@@ -127,7 +173,8 @@ export default defineComponent({
 .el-pagination {
   margin-top: 20px;
 }
-.el-form{
+
+.el-form {
   margin-bottom: 20px;
 }
 </style>

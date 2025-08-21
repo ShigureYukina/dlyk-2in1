@@ -20,4 +20,6 @@ public class Constants {
     //分页时每页显示10条数据
     public static final int PAGE_SIZE = 10;
     public static final String TOKEN_HEADER = "Authorization";
+
+    public static final String REDIS_OWNER_KEY = "dlyk:user:owner";
 }

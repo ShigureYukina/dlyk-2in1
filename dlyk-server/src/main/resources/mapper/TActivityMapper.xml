@@ -45,10 +45,29 @@
     </select>
     <select id="selectActivityByPage" resultMap="ActivityResultMap">
         select
-        ta.id, ta.owner_id, ta.`name`, ta.start_time, ta.end_time, ta.cost, ta.description, ta.create_time, ta.create_by,
-    ta.edit_time, ta.edit_by, tu.id ownerId, tu.name as ownerName
+        ta.id, ta.owner_id, ta.`name`, ta.start_time, ta.end_time, ta.cost, ta.description, ta.create_time,
+        ta.create_by,
+        ta.edit_time, ta.edit_by, tu.id ownerId, tu.name as ownerName
         from t_activity ta left join t_user tu on ta.owner_id = tu.id
         <where>
+            <if test="ownerId != null">
+                and owner_id = #{ownerId}
+            </if>
+            <if test="name != null">
+                and ta.name like concat('%', #{name}, '%')
+            </if>
+            <if test="startTime != null">
+                and start_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                <![CDATA[ and end_time <= #{endTime} ]]>
+            </if>
+            <if test="cost != null">
+                and cost >= #{cost}
+            </if>
+            <if test="createTime != null">
+                and ta.create_time >= #{createTime}
+            </if>
             ${filterSQL}
         </where>
     </select>

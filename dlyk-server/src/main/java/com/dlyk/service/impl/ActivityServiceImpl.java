@@ -3,7 +3,7 @@ package com.dlyk.service.impl;
 import com.dlyk.constant.Constants;
 import com.dlyk.mapper.TActivityMapper;
 import com.dlyk.model.TActivity;
-import com.dlyk.query.BaseQuery;
+import com.dlyk.query.ActivityQuery;
 import com.dlyk.service.ActivityService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -19,11 +19,11 @@ public class ActivityServiceImpl implements ActivityService {
     private TActivityMapper tActivityMapper;
 
     @Override
-    public PageInfo<TActivity> getActivityByPage(Integer current) {
+    public PageInfo<TActivity> getActivityByPage(Integer current, ActivityQuery activityquery) {
         // 1.设置PageHelper
         PageHelper.startPage(current, Constants.PAGE_SIZE);
         // 2.查询
-        List<TActivity> list = tActivityMapper.selectActivityByPage(BaseQuery.builder().build());
+        List<TActivity> list = tActivityMapper.selectActivityByPage(activityquery);
         // 3.封装分页数据到PageInfo
         PageInfo<TActivity> info = new PageInfo<>(list);
 

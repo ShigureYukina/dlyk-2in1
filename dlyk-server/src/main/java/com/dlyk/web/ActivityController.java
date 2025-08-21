@@ -1,6 +1,7 @@
 package com.dlyk.web;
 
 import com.dlyk.model.TActivity;
+import com.dlyk.query.ActivityQuery;
 import com.dlyk.result.R;
 import com.dlyk.service.ActivityService;
 import com.github.pagehelper.PageInfo;
@@ -16,11 +17,12 @@ public class ActivityController {
     private ActivityService activityService;
 
     @GetMapping(value = "/api/activitys")
-    public R UserPage(@RequestParam(value = "current", required = false) Integer current) {
+    public R ActivityPage(@RequestParam(value = "current", required = false) Integer current,
+                          ActivityQuery activityQuery) {
         if (current == null) {
             current = 1;
         }
-        PageInfo<TActivity> pageInfo = activityService.getActivityByPage(current);
+        PageInfo<TActivity> pageInfo = activityService.getActivityByPage(current, activityQuery);
         return R.OK(pageInfo);
     }
 }

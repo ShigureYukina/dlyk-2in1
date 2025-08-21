@@ -80,7 +80,7 @@ public class SecurityConfig {
     public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*")); //允许任何来源，http://localhost:8081
-        configuration.setAllowedMethods(List.of("*")); //允许任何请求方法，post、get、put、delete
+        configuration.setAllowedMethods(List.of("*")); //允许任何请求方法，post、getValue、put、delete
         configuration.setAllowedHeaders(List.of("*")); //允许任何的请求头
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

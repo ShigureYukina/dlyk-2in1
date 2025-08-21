@@ -1,14 +1,15 @@
 package com.dlyk.service.impl;
 
 import com.dlyk.constant.Constants;
+import com.dlyk.manager.RedisManager;
 import com.dlyk.mapper.TRoleMapper;
 import com.dlyk.mapper.TUserMapper;
-import com.dlyk.mapper.TUserRoleMapper;
 import com.dlyk.model.TRole;
 import com.dlyk.model.TUser;
 import com.dlyk.query.BaseQuery;
 import com.dlyk.query.UserQuery;
 import com.dlyk.service.UserService;
+import com.dlyk.util.CacheUtils;
 import com.dlyk.util.JWTUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +34,9 @@ public class UserServiceImpl implements UserService {
     private TRoleMapper tRoleMapper;
     @Resource
     private PasswordEncoder passwordEncoder;
+
+    @Resource
+    private RedisManager redisManager;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -64,8 +68,7 @@ public class UserServiceImpl implements UserService {
         // 2.查询
         List<TUser> list = tUserMapper.selectUserByPage(BaseQuery.builder().build());
         // 3.封装分页数据到PageInfo
-        PageInfo<TUser> info = new PageInfo<>(list);
-        return info;
+        return new PageInfo<>(list);
     }
 
     @Override
@@ -118,5 +121,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public int batchdeleteUserByIds(List<String> idList) {
         return tUserMapper.deleteByIds(idList);
+    }
+
+    @Override
+    public List<TUser> getOwnerList() {
+
+        return CacheUtils.getCacheData(() -> {
+                    Object cacheData = redisManager.getValue(Constants.REDIS_OWNER_KEY);
+                    if (cacheData instanceof List) {
+                        return (List<TUser>) cacheData;
+                    }
+                    return null;
+                }, () -> {
+                    return tUserMapper.selectByOwner();
+                },
+                (t) -> {
+                    redisManager.setValue(Constants.REDIS_OWNER_KEY, t);
+                });
     }
 }
