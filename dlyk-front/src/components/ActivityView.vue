@@ -154,12 +154,22 @@ export default defineComponent({
           this.ownerOptions = response.data.data;
         }
       })
-    }
-    ,
+    },
     onSearch() {
       this.getData(1);
-    }
-
+    },
+    onReset() {
+      this.activityQuery = {};
+    },
+    add() {
+      this.$router.push({path: '/dashboard/activity/add'});
+    },
+    edit(id) {
+      this.$router.push({path: '/dashboard/activity/edit/'+id});
+    },
+    view(id) {
+      this.$router.push({path: '/dashboard/activity/'+id});
+    },
   }
 })
 

@@ -9,6 +9,8 @@ import java.util.Date;
 /** copy by ShigureYukina,from 2025/8/21-下午3:47 */
 @Data
 public class ActivityQuery extends BaseQuery {
+    private Integer id;
+
     private Integer ownerId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -23,6 +25,8 @@ public class ActivityQuery extends BaseQuery {
     private BigDecimal cost;
 
     private String name;
+
+    private String description;
 
 
 }

@@ -34,14 +34,29 @@ let router = createRouter({
                 },
                 {
                     //子路由路径,id是动态参数
-                    path:'user/:id',
+                    path: 'user/:id',
                     component: () => import('../components/UserDetailView.vue'),
 
                 },
                 {
                     //子路由路径
-                    path:'activity',
+                    path: 'activity',
                     component: () => import('../components/ActivityView.vue'),
+                },
+                {
+                    //子路由路径
+                    path: 'activity/:id',
+                    component: () => import('../components/ActivityDetailView.vue'),
+                },
+                {
+                    //子路由路径
+                    path: 'activity/add',
+                    component: () => import('../components/ActivityRecordView.vue'),
+                },
+                {
+                    //子路由路径
+                    path: 'activity/edit/:id',
+                    component: () => import('../components/ActivityRecordView.vue'),
                 }
             ]
         },

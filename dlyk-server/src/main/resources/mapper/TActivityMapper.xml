@@ -32,17 +32,34 @@
             <id column="ownerId" jdbcType="INTEGER" property="id"/>
             <result column="ownerName" jdbcType="VARCHAR" property="name"/>
         </association>
+        <association property="createByDO" javaType="com.dlyk.model.TUser">
+            <id column="createById" jdbcType="INTEGER" property="id"/>
+            <result column="createByName" jdbcType="VARCHAR" property="name"/>
+        </association>
+        <association property="editByDO" javaType="com.dlyk.model.TUser">
+            <id column="editById" jdbcType="INTEGER" property="id"/>
+            <result column="createByName" jdbcType="VARCHAR" property="name"/>
+        </association>
     </resultMap>
     <sql id="Base_Column_List">
         id, owner_id, `name`, start_time, end_time, cost, description, create_time, create_by,
     edit_time, edit_by
     </sql>
-    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from t_activity
-        where id = #{id,jdbcType=INTEGER}
-    </select>
+<select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ActivityResultMap">
+    select ta.*,
+           tu1.id   ownerId,
+           tu1.name ownerName,
+           tu2.id   createBy,
+           tu2.name createByName,
+           tu3.id   editBy,
+           tu3.name editByName
+    from t_activity ta
+             left join t_user tu1 on ta.owner_id = tu1.id
+             left join t_user tu2 on ta.create_by = tu2.id
+             left join t_user tu3 on ta.edit_by = tu3.id
+    where ta.id = #{id,jdbcType=INTEGER}
+</select>
+
     <select id="selectActivityByPage" resultMap="ActivityResultMap">
         select
         ta.id, ta.owner_id, ta.`name`, ta.start_time, ta.end_time, ta.cost, ta.description, ta.create_time,

@@ -7,4 +7,10 @@ import com.github.pagehelper.PageInfo;
 /** copy by ShigureYukina,from 2025/8/20-下午4:13 */
 public interface ActivityService {
     PageInfo<TActivity> getActivityByPage(Integer current, ActivityQuery activityquery);
+
+    int saveActivity(ActivityQuery activityQuery);
+
+    TActivity getActivityById(Integer id);
+
+    int updateActivity(ActivityQuery activityQuery);
 }

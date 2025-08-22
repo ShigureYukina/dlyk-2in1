@@ -51,3 +51,7 @@ export function messageConfirm(msg) {
         }
     )
 }
+
+export function goback() {
+    this.$router.go(-1);
+}
