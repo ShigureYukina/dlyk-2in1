@@ -86,12 +86,13 @@
                  @prev-click="toPage" @next-click="toPage" @current-change="toPage"/>
 </template>
 <script>
-
 import {defineComponent} from "vue";
-import {doGet} from "../http/httpRequest.js";
+import {doDelete, doGet} from "../http/httpRequest.js";
+import {messageConfirm, messageTip} from "../util/util.js";
 
 export default defineComponent({
-  name: "ActivityView",
+  name: "",
+  inject: ['reload'],
   data() {
     return {
       activityQuery: {},
@@ -109,13 +110,21 @@ export default defineComponent({
           {pattern: /^[0-9]+(\.[0-9]{2})*?$/, message: '活动预算必须是整数或最多两位小数', trigger: 'blur'}
         ],
 
-      }
+      },
+      activityIdArr: [],
     }
   },
   mounted() {
     this.getData(1);
   },
   methods: {
+    handleSelectionChange(selectionDataArray) {
+      this.activityIdArr = [];
+      selectionDataArray.forEach(data => {
+        let activityId = data.id;
+        this.activityIdArr.push(activityId);
+      })
+    },
     getData(current) {
       let startTime = '';
       let endTime = '';
@@ -165,10 +174,47 @@ export default defineComponent({
       this.$router.push({path: '/dashboard/activity/add'});
     },
     edit(id) {
-      this.$router.push({path: '/dashboard/activity/edit/'+id});
+      this.$router.push({path: '/dashboard/activity/edit/' + id});
     },
     view(id) {
-      this.$router.push({path: '/dashboard/activity/'+id});
+      this.$router.push({path: '/dashboard/activity/' + id});
+    },
+    del(id) {
+      messageConfirm("你确定要删除该市场活动吗？").then(() => {
+        return doDelete("/api/activity/" + id).then(response => {
+          if (response.data.code === 200) {
+            messageTip("删除市场活动成功", "success");
+            this.reload(); // 刷新市场活动列表
+          } else {
+            messageTip("删除市场活动失败", "error");
+          }
+        }).catch(error => {
+          console.error("删除市场活动失败:", error);
+          messageTip("删除市场活动失败", "error");
+        });
+      });
+    },
+
+    batchDel() {
+      if (this.activityIdArr.length <= 0) {
+        messageTip("请选择要删除的市场活动", "warning")
+        return
+      }
+      messageConfirm("你确定要批量删除选中的市场活动吗？").then(() => {
+        let ids = this.activityIdArr.join(",");
+        // 将ids作为查询参数传递
+        doDelete(`/api/activity/batch?ids=${ids}`).then(response => {
+          if (response.data.code === 200) {
+            messageTip("批量删除市场活动成功", "success");
+            this.reload(); // 刷新市场活动列表
+          } else {
+            messageTip("批量删除市场活动失败,原因:" + response.data.msg, "error");
+          }
+        }).catch(error => {
+          console.error("批量删除市场活动失败:", error);
+          messageTip("批量删除市场活动失败", "error");
+        })
+      })
     },
   }
 })

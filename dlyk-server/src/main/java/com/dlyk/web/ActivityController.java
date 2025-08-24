@@ -1,17 +1,19 @@
 package com.dlyk.web;
 
 import com.dlyk.model.TActivity;
-import com.dlyk.query.ActivityQuery;
 import com.dlyk.result.R;
+import com.dlyk.query.ActivityQuery;
 import com.dlyk.service.ActivityService;
 import com.github.pagehelper.PageInfo;
-import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
-/** copy by ShigureYukina,from 2025/8/20-下午4:09 */
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 public class ActivityController {
-    @Resource
+    @Autowired
     private ActivityService activityService;
 
     @GetMapping(value = "/api/activitys")
@@ -44,5 +46,16 @@ public class ActivityController {
         return result >= 1 ? R.OK() : R.FAIL();
     }
 
+    @DeleteMapping(value = "/api/activity/{id}")
+    public R deleteActivity(@PathVariable("id") Integer id) {
+        int del = activityService.deleteActivity(id);
+        return del >= 1 ? R.OK() : R.FAIL();
+    }
 
+    @DeleteMapping(value = "/api/activity/batch")
+    public R batchDeleteActivity(@RequestParam(value = "ids") String ids) {
+        List<String> idList = Arrays.asList(ids.split(","));
+        int batchDel = activityService.batchDeleteActivityByIds(idList);
+        return batchDel >= 1 ? R.OK() : R.FAIL();
+    }
 }

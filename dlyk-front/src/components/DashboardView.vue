@@ -26,12 +26,6 @@
             </el-icon>
             市场活动
           </el-menu-item>
-          <el-menu-item index="1-2">
-            <el-icon>
-              <DataAnalysis/>
-            </el-icon>
-            市场统计
-          </el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="2">
@@ -42,7 +36,7 @@
             <span>线索管理</span>
           </template>
 
-          <el-menu-item index="1-1">
+          <el-menu-item index="/dashboard/clue">
             <el-icon>
               <Film/>
             </el-icon>

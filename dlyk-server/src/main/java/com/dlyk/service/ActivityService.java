@@ -4,7 +4,8 @@ import com.dlyk.model.TActivity;
 import com.dlyk.query.ActivityQuery;
 import com.github.pagehelper.PageInfo;
 
-/** copy by ShigureYukina,from 2025/8/20-下午4:13 */
+import java.util.List;
+
 public interface ActivityService {
     PageInfo<TActivity> getActivityByPage(Integer current, ActivityQuery activityquery);
 
@@ -13,4 +14,8 @@ public interface ActivityService {
     TActivity getActivityById(Integer id);
 
     int updateActivity(ActivityQuery activityQuery);
+
+    int deleteActivity(Integer id);
+
+    int batchDeleteActivityByIds(List<String> idList);
 }

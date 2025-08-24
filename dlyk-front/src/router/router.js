@@ -57,7 +57,12 @@ let router = createRouter({
                     //子路由路径
                     path: 'activity/edit/:id',
                     component: () => import('../components/ActivityRecordView.vue'),
-                }
+                },
+                {
+                    //子路由路径
+                    path: 'clue',
+                    component: () => import('../components/ClueView.vue'),
+                },
             ]
         },
         {

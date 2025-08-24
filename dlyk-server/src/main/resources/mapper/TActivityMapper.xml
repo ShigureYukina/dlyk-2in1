@@ -38,27 +38,28 @@
         </association>
         <association property="editByDO" javaType="com.dlyk.model.TUser">
             <id column="editById" jdbcType="INTEGER" property="id"/>
-            <result column="createByName" jdbcType="VARCHAR" property="name"/>
+            <result column="editByName" jdbcType="VARCHAR" property="name"/>
         </association>
     </resultMap>
+    
     <sql id="Base_Column_List">
-        id, owner_id, `name`, start_time, end_time, cost, description, create_time, create_by,
-    edit_time, edit_by
+        id, owner_id, `name`, start_time, end_time, cost, description, create_time, create_by, edit_time, edit_by
     </sql>
-<select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ActivityResultMap">
-    select ta.*,
-           tu1.id   ownerId,
-           tu1.name ownerName,
-           tu2.id   createBy,
-           tu2.name createByName,
-           tu3.id   editBy,
-           tu3.name editByName
-    from t_activity ta
-             left join t_user tu1 on ta.owner_id = tu1.id
-             left join t_user tu2 on ta.create_by = tu2.id
-             left join t_user tu3 on ta.edit_by = tu3.id
-    where ta.id = #{id,jdbcType=INTEGER}
-</select>
+    
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ActivityResultMap">
+        select ta.*,
+        tu1.id ownerId,
+        tu1.name ownerName,
+        tu2.id createById,
+        tu2.name createByName,
+        tu3.id editById,
+        tu3.name editByName
+        from t_activity ta
+        left join t_user tu1 on ta.owner_id = tu1.id
+        left join t_user tu2 on ta.create_by = tu2.id
+        left join t_user tu3 on ta.edit_by = tu3.id
+        where ta.id = #{id,jdbcType=INTEGER}
+    </select>
 
     <select id="selectActivityByPage" resultMap="ActivityResultMap">
         select
@@ -94,16 +95,24 @@
         from t_activity
         where id = #{id,jdbcType=INTEGER}
     </delete>
+    
+    <delete id="deleteByIds">
+        delete from t_activity where id in
+        <foreach collection="idList" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TActivity"
             useGeneratedKeys="true">
         insert into t_activity (owner_id, `name`, start_time,
-                                end_time, cost, description,
-                                create_time, create_by, edit_time,
-                                edit_by)
+        end_time, cost, description,
+        create_time, create_by, edit_time,
+        edit_by)
         values (#{ownerId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP},
-                #{endTime,jdbcType=TIMESTAMP}, #{cost,jdbcType=DECIMAL}, #{description,jdbcType=VARCHAR},
-                #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=INTEGER}, #{editTime,jdbcType=TIMESTAMP},
-                #{editBy,jdbcType=INTEGER})
+        #{endTime,jdbcType=TIMESTAMP}, #{cost,jdbcType=DECIMAL}, #{description,jdbcType=VARCHAR},
+        #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=INTEGER}, #{editTime,jdbcType=TIMESTAMP},
+        #{editBy,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TActivity"
             useGeneratedKeys="true">
@@ -211,16 +220,16 @@
     </update>
     <update id="updateByPrimaryKey" parameterType="com.dlyk.model.TActivity">
         update t_activity
-        set owner_id    = #{ownerId,jdbcType=INTEGER},
-            `name`      = #{name,jdbcType=VARCHAR},
-            start_time  = #{startTime,jdbcType=TIMESTAMP},
-            end_time    = #{endTime,jdbcType=TIMESTAMP},
-            cost        = #{cost,jdbcType=DECIMAL},
-            description = #{description,jdbcType=VARCHAR},
-            create_time = #{createTime,jdbcType=TIMESTAMP},
-            create_by   = #{createBy,jdbcType=INTEGER},
-            edit_time   = #{editTime,jdbcType=TIMESTAMP},
-            edit_by     = #{editBy,jdbcType=INTEGER}
+        set owner_id = #{ownerId,jdbcType=INTEGER},
+        `name` = #{name,jdbcType=VARCHAR},
+        start_time = #{startTime,jdbcType=TIMESTAMP},
+        end_time = #{endTime,jdbcType=TIMESTAMP},
+        cost = #{cost,jdbcType=DECIMAL},
+        description = #{description,jdbcType=VARCHAR},
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+        create_by = #{createBy,jdbcType=INTEGER},
+        edit_time = #{editTime,jdbcType=TIMESTAMP},
+        edit_by = #{editBy,jdbcType=INTEGER}
         where id = #{id,jdbcType=INTEGER}
     </update>
 </mapper>

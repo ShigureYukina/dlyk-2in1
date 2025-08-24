@@ -71,6 +71,16 @@ public class ActivityServiceImpl implements ActivityService {
         return tActivityMapper.updateByPrimaryKeySelective(tActivity);
     }
 
+    @Override
+    public int deleteActivity(Integer id) {
+        return tActivityMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int batchDeleteActivityByIds(List<String> idList) {
+        return tActivityMapper.deleteByIds(idList);
+    }
+
 
 
 }
