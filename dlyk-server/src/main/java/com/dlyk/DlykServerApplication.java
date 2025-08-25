@@ -13,6 +13,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 @MapperScan(basePackages = {"com.dlyk.mapper"})
@@ -21,6 +23,8 @@ public class DlykServerApplication implements CommandLineRunner {
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+
+    public static final Map<String, Object> cacheMap = new HashMap<>();
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(DlykServerApplication.class, args);

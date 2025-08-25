@@ -2,6 +2,8 @@ package com.dlyk.mapper;
 
 import com.dlyk.model.TProduct;
 
+import java.util.List;
+
 public interface TProductMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,6 @@ public interface TProductMapper {
     int updateByPrimaryKeySelective(TProduct record);
 
     int updateByPrimaryKey(TProduct record);
+
+    List<TProduct> selectAllOnSale();
 }

@@ -146,6 +146,36 @@
         from t_clue
         where id = #{id,jdbcType=INTEGER}
     </delete>
+    <insert id="saveClue" parameterType="java.util.List">
+        <if test="list != null and list.size() > 0">
+            insert into t_clue (owner_id, activity_id, full_name,
+            appellation, phone, weixin,
+            qq, email, age, job,
+            year_income, address, need_loan,
+            intention_state, intention_product, `state`,
+            `source`, description, next_contact_time,
+            create_time, create_by, edit_time,
+            edit_by)
+            values
+            <foreach collection="list" item="item" separator=",">
+                (#{item.ownerId,jdbcType=INTEGER}, #{item.activityId,jdbcType=INTEGER},
+                #{item.fullName,jdbcType=VARCHAR},
+                #{item.appellation,jdbcType=INTEGER}, #{item.phone,jdbcType=VARCHAR},
+                #{item.weixin,jdbcType=VARCHAR},
+                #{item.qq,jdbcType=VARCHAR}, #{item.email,jdbcType=VARCHAR}, #{item.age,jdbcType=INTEGER},
+                #{item.job,jdbcType=VARCHAR},
+                #{item.yearIncome,jdbcType=DECIMAL}, #{item.address,jdbcType=VARCHAR},
+                #{item.needLoan,jdbcType=INTEGER},
+                #{item.intentionState,jdbcType=INTEGER}, #{item.intentionProduct,jdbcType=INTEGER},
+                #{item.state,jdbcType=INTEGER},
+                #{item.source,jdbcType=INTEGER}, #{item.description,jdbcType=VARCHAR},
+                #{item.nextContactTime,jdbcType=TIMESTAMP},
+                #{item.createTime,jdbcType=TIMESTAMP}, #{item.createBy,jdbcType=INTEGER},
+                #{item.editTime,jdbcType=TIMESTAMP},
+                #{item.editBy,jdbcType=INTEGER})
+            </foreach>
+        </if>
+    </insert>
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.dlyk.model.TClue" useGeneratedKeys="true">
         insert into t_clue (owner_id, activity_id, full_name,
                             appellation, phone, weixin,

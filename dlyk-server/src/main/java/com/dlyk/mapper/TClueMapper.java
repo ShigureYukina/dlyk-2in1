@@ -19,4 +19,8 @@ public interface TClueMapper {
     int updateByPrimaryKey(TClue record);
 
     List<TClue> selectClueByPage(BaseQuery build);
+
+
+
+    int saveClue(List<TClue> clueList);
 }

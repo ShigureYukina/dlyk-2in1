@@ -1,7 +1,9 @@
 package com.dlyk.model;
 
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 字典类型表
@@ -28,6 +30,8 @@ public class TDicType implements Serializable {
      * 备注
      */
     private String remark;
+
+    private List<TDicValue> dicValueList;
 
     private static final long serialVersionUID = 1L;
 }

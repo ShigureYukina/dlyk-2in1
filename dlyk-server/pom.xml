@@ -104,6 +104,11 @@
             <artifactId>spring-boot-starter-aop</artifactId>
             <version>2.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <version>3.1.1</version>
+        </dependency>
 
     </dependencies>
 
