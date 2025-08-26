@@ -15,7 +15,8 @@ public enum DicEnum {
     INTENTION_STATE("intentionState"),
     CLUE_STATE("clueState"),
     SOURCE("source"),
-    PRODUCT("product");
+    PRODUCT("product"),
+    ACTIVITY("activity");
 
     @Getter
     @Setter

@@ -1,10 +1,12 @@
 package com.dlyk.task;
 
 import com.dlyk.DlykServerApplication;
+import com.dlyk.model.TActivity;
 import com.dlyk.model.TDicType;
 import com.dlyk.model.TDicValue;
 import com.dlyk.model.TProduct;
 import com.dlyk.result.DicEnum;
+import com.dlyk.service.ActivityService;
 import com.dlyk.service.DicTypeService;
 import com.dlyk.service.ProductService;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +26,8 @@ public class DataTask {
     private DicTypeService dicTypeService;
     @Resource
     private ProductService productService;
+    @Resource
+    private ActivityService activityservice;
 
     @PostConstruct
     public void init() {
@@ -46,7 +50,12 @@ public class DataTask {
             DlykServerApplication.cacheMap.put(typeCode, dicValueList);
         });
 
+        //查询产品信息并缓存
         List<TProduct> tProductList = productService.loadAllProduct();
         DlykServerApplication.cacheMap.put(DicEnum.PRODUCT.getCode(), tProductList);
+
+        //查询进行的活动
+        List<TActivity> tActivityList = activityservice.getOngoingActivity();
+        DlykServerApplication.cacheMap.put(DicEnum.ACTIVITY.getCode(), tActivityList);
     }
 }

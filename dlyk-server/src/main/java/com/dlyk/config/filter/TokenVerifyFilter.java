@@ -102,9 +102,10 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
 
 
             //异步处理（更好的方式，使用线程池去执行）
+            //提前获取rememberMe的值，避免在异步线程中访问已回收的request对象
+            String rememberMe = request.getHeader("rememberMe");
             threadPoolTaskExecutor.execute(() -> {
                 //刷新token
-                String rememberMe = request.getHeader("rememberMe");
                 if (Boolean.parseBoolean(rememberMe)) {
                     redisService.expire(Constants.REDIS_JWT_KEY + tUser.getId(), Constants.EXPIRE_TIME, TimeUnit.SECONDS);
                 } else {

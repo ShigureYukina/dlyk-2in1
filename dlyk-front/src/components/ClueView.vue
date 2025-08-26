@@ -21,7 +21,15 @@
     <el-table-column property="needLoanDO.typeValue" label="是否贷款"/>
     <el-table-column property="intentionStateDO.typeValue" label="意向状态"/>
     <el-table-column property="intentionProductDO.name" label="意向产品"/>
-    <el-table-column property="stateDO.typeValue" label="线索状态"/>
+
+    <el-table-column property="stateDO.typeValue" label="线索状态">
+      <template #default="scope">
+        <span style="color: #409EFF" v-if="scope.row.state===-1">{{ scope.row.stateDO.typeValue }}</span>
+        <span v-else>{{ scope.row.stateDO.typeValue }}</span>
+      </template>
+    </el-table-column>
+
+
     <el-table-column property="sourceDO.typeValue" label="线索来源"/>
     <el-table-column property="nextContactTime" label="下次联系时间" width="165"/>
     <el-table-column label="操作" width="230">
@@ -98,7 +106,7 @@ export default defineComponent({
   },
   methods: {
     addClue() {
-      this.$router.push('/clue/add')
+      this.$router.push('/dashboard/clue/add')
     },
     importExcel() {
       this.importExcelDialogVisible = true;
@@ -113,10 +121,10 @@ export default defineComponent({
       this.$refs.uploadRef.submit()
     },
     view(id) {
-      this.$router.push('/clue/view/' + id)
+      this.$router.push('/dashboard/clue/detail/' + id)
     },
     edit(id) {
-      this.$router.push('/clue/edit/' + id)
+      this.$router.push('/dashboard/clue/edit/' + id)
     },
     del(id) {
       this.$confirm('确认删除该线索？').then(() => {

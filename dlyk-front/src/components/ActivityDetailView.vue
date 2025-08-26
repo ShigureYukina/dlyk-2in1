@@ -50,7 +50,7 @@
       />
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="activitysubmit">提交</el-button>
+      <el-button type="primary" @click="activitySubmit">提交</el-button>
       <el-button @click="goback">返回</el-button>
     </el-form-item>
     <el-table
@@ -161,7 +161,7 @@ export default defineComponent({
           });
     }
     ,
-    activitysubmit() {
+    activitySubmit() {
       this.$refs.activityRemark.validate((valid) => {
         if (valid) {
           doPost("/api/activity/remark", {

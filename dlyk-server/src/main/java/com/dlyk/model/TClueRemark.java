@@ -1,8 +1,9 @@
 package com.dlyk.model;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 线索跟踪记录表
@@ -54,6 +55,10 @@ public class TClueRemark implements Serializable {
      * 删除状态（0正常，1删除）
      */
     private Integer deleted;
+
+    private TUser createByDO;
+    private TUser editByDO;
+    private TDicValue noteWayDO;
 
     private static final long serialVersionUID = 1L;
 }

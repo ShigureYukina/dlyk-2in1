@@ -20,7 +20,9 @@ public interface TClueMapper {
 
     List<TClue> selectClueByPage(BaseQuery build);
 
-
-
     int saveClue(List<TClue> clueList);
+
+    int selectByPhone(String phone);
+
+    TClue selectDetailById(Integer id);
 }

@@ -24,4 +24,6 @@ public interface TActivityMapper {
     List<TActivity> selectActivityByPage(ActivityQuery query);
 
     int deleteByIds(@Param("idList") List<String> idList);
+
+    List<TActivity> selectOngoingActivity();
 }

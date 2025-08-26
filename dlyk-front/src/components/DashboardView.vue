@@ -200,31 +200,26 @@ export default defineComponent({
 
       mounted() {
         this.loadLoginUser()
-      }
-      ,
+      },
       methods: {
         showMenu() {
           this.isCollapse = !this.isCollapse;
-        }
-        ,
+        },
         loadLoginUser() {
           doGet("/api/login/info", {}).then((resp) => {
             this.user = resp.data.data;
           })
-        }
-        ,
+        },
         logout() {
           doGet("/api/logout", {}).then((response) => {
             removeToken()
             messageTip("退出成功", "success")
             window.location.href = "/";
           })
-        }
-        ,
+        },
       }
     }
-)
-;
+);
 
 
 </script>

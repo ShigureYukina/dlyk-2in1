@@ -63,6 +63,22 @@ let router = createRouter({
                     path: 'clue',
                     component: () => import('../components/ClueView.vue'),
                 },
+                {
+                    //子路由路径
+                    path: 'clue/add',
+                    component: () => import('../components/ClueRecordView.vue'),
+                },
+                {
+                    //子路由路径
+                    path: 'clue/edit/:id',
+                    component: () => import('../components/ClueRecordView.vue'),
+                },
+                {
+                    //子路由路径
+                    path: 'clue/detail/:id',
+                    component: () => import('../components/ClueDetailView.vue'),
+                },
+
             ]
         },
         {

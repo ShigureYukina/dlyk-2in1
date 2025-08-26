@@ -8,7 +8,6 @@ import com.dlyk.service.ActivityService;
 import com.dlyk.util.JWTUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -81,6 +80,8 @@ public class ActivityServiceImpl implements ActivityService {
         return tActivityMapper.deleteByIds(idList);
     }
 
-
-
+    @Override
+    public List<TActivity> getOngoingActivity() {
+        return tActivityMapper.selectOngoingActivity();
+    }
 }
