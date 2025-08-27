@@ -2,6 +2,8 @@ package com.dlyk.mapper;
 
 import com.dlyk.model.TPermission;
 
+import java.util.List;
+
 public interface TPermissionMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,8 @@ public interface TPermissionMapper {
     int updateByPrimaryKeySelective(TPermission record);
 
     int updateByPrimaryKey(TPermission record);
+
+    List<TPermission> selectMenuPermissionByUserId(Integer id);
+
+    List<TPermission> selectButtonPermissionByUserId(Integer id);
 }

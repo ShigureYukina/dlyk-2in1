@@ -78,6 +78,11 @@ let router = createRouter({
                     path: 'clue/detail/:id',
                     component: () => import('../components/ClueDetailView.vue'),
                 },
+                {
+                    //子路由路径
+                    path: 'customer',
+                    component: () => import('../components/CustomerView.vue'),
+                },
 
             ]
         },

@@ -1,7 +1,9 @@
 package com.dlyk.model;
 
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 权限表
@@ -48,6 +50,8 @@ public class TPermission implements Serializable {
      * 菜单的图标
      */
     private String icon;
+
+    private List<TPermission> subPermissionDO;
 
     private static final long serialVersionUID = 1L;
 }

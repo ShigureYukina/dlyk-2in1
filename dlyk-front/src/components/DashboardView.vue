@@ -6,137 +6,30 @@
           background-color="#334157"
           text-color="white"
           style=" border-right: solid 0;"
-          @open="handleOpen"
-          @close="handleClose"
           :collapse="isCollapse"
+          :default-active="activeIndex"
           :collapse-transition="false"
           :router="true"
           :unique-opened="true"
       >
-        <el-sub-menu index="1">
+        <!-- 修改点1: 使用正确的属性名 subPermissionDO -->
+        <el-sub-menu :index="String(menuPermission.id)" v-for="menuPermission in user.menuPermissionList"
+                     :key="menuPermission.id">
           <template #title>
             <el-icon>
-              <OfficeBuilding/>
+              <component :is="menuPermission.icon"></component>
             </el-icon>
-            <span>市场活动</span>
+            <span> {{ menuPermission.name }} </span>
           </template>
-          <el-menu-item index="/dashboard/activity">
+          <el-menu-item v-for="subPermission in menuPermission.subPermissionDO" :key="subPermission.id"
+                        :index="subPermission.url">
             <el-icon>
-              <Notification/>
+              <component :is="subPermission.icon"></component>
             </el-icon>
-            市场活动
+            {{ subPermission.name }}
           </el-menu-item>
         </el-sub-menu>
 
-        <el-sub-menu index="2">
-          <template #title>
-            <el-icon>
-              <Magnet/>
-            </el-icon>
-            <span>线索管理</span>
-          </template>
-
-          <el-menu-item index="/dashboard/clue">
-            <el-icon>
-              <Film/>
-            </el-icon>
-            线索管理
-          </el-menu-item>
-
-        </el-sub-menu>
-
-        <el-sub-menu index="3">
-          <template #title>
-            <el-icon>
-              <User/>
-            </el-icon>
-            <span>客户管理</span>
-          </template>
-
-          <el-menu-item index="1-1">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            客户管理
-          </el-menu-item>
-
-        </el-sub-menu>
-
-        <el-sub-menu index="4">
-          <template #title>
-            <el-icon>
-              <Wallet/>
-            </el-icon>
-            <span>交易管理</span>
-          </template>
-
-          <el-menu-item index="1-1">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            交易管理
-          </el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="5">
-          <template #title>
-            <el-icon>
-              <Memo/>
-            </el-icon>
-            <span>产品管理</span>
-          </template>
-          <el-menu-item index="1-1">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            产品管理
-          </el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="6">
-          <template #title>
-            <el-icon>
-              <Grid/>
-            </el-icon>
-            <span>字典管理</span>
-          </template>
-          <el-menu-item index="1-1">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            字典管理
-          </el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="7">
-          <template #title>
-            <el-icon>
-              <Stamp/>
-            </el-icon>
-            <span>用户管理</span>
-          </template>
-          <el-menu-item index="/dashboard/user">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            用户管理
-          </el-menu-item>
-        </el-sub-menu>
-
-        <el-sub-menu index="8">
-          <template #title>
-            <el-icon>
-              <Setting/>
-            </el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="1-1">
-            <el-icon>
-              <CreditCard/>
-            </el-icon>
-            系统管理
-          </el-menu-item>
-        </el-sub-menu>
       </el-menu>
     </el-aside>
 
@@ -182,6 +75,8 @@ export default defineComponent({
           isCollapse: false,
           user: {},
           isRouteActive: true,
+          activeIndex: ''
+
         };
       },
       provide() {
@@ -197,9 +92,9 @@ export default defineComponent({
         }
       },
 
-
       mounted() {
         this.loadLoginUser()
+        this.loadCurrentRoute()
       },
       methods: {
         showMenu() {
@@ -208,6 +103,9 @@ export default defineComponent({
         loadLoginUser() {
           doGet("/api/login/info", {}).then((resp) => {
             this.user = resp.data.data;
+            // 修改点2: 添加调试日志，检查数据结构
+            console.log("用户数据:", this.user);
+            console.log("菜单数据:", this.user.menuPermissionList);
           })
         },
         logout() {
@@ -217,11 +115,17 @@ export default defineComponent({
             window.location.href = "/";
           })
         },
+        loadCurrentRoute() {
+          let arr = this.$route.path.split("/");
+          if (arr.length > 2) {
+            this.activeIndex = "/" + arr[1] + "/" + arr[2];
+          } else {
+            this.activeIndex = this.$route.path;
+          }
+        }
       }
     }
 );
-
-
 </script>
 <style scoped>
 .el-aside {

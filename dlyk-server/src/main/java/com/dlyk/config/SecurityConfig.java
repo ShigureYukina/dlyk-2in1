@@ -2,6 +2,7 @@ package com.dlyk.config;
 
 
 import com.dlyk.config.filter.TokenVerifyFilter;
+import com.dlyk.config.handler.MyAccessDeniedHandler;
 import com.dlyk.config.handler.MyAuthenticationFailureHandler;
 import com.dlyk.config.handler.MyAuthenticationSuccessHandler;
 import com.dlyk.config.handler.MyLogoutSuccessHandler;
@@ -9,6 +10,7 @@ import com.dlyk.constant.Constants;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+@EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
 
@@ -43,7 +46,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CorsConfigurationSource configurationSource) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, CorsConfigurationSource configurationSource, MyAccessDeniedHandler myAccessDeniedHandler) throws Exception {
         //禁用跨站请求伪造
         return httpSecurity
                 .formLogin((formLogin) -> formLogin.loginProcessingUrl(Constants.LOGIN_URI) //登录处理地址，不需要写Controller
@@ -73,7 +76,12 @@ public class SecurityConfig {
                 //退出登录
                 .logout((logout) -> logout.logoutUrl("/api/logout") //退出提交到该地址，该地址不需要我们写controller的，是框架处理
                         .logoutSuccessHandler(myLogoutSuccessHandler))
+
+                .exceptionHandling((exceptionHandling) -> exceptionHandling.accessDeniedHandler(myAccessDeniedHandler))
+
                 .build();
+
+
     }
 
     @Bean
@@ -87,4 +95,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

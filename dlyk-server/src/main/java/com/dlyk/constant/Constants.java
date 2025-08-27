@@ -7,6 +7,7 @@ package com.dlyk.constant;
 public class Constants {
 
     public static final String LOGIN_URI = "/api/login";
+    public static final String EXPORT_URI = "/api/exportExcel";
 
     //redis的key的命名规范： 项目名:模块名:功能名:唯一业务参数(比如用户id)
     public static final String REDIS_JWT_KEY = "dlyk:user:login:";
@@ -22,4 +23,6 @@ public class Constants {
     public static final String TOKEN_HEADER = "Authorization";
 
     public static final String REDIS_OWNER_KEY = "dlyk:user:owner";
+    public static final String EMPTY = "";
+
 }

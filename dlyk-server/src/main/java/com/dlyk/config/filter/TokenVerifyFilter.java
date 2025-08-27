@@ -43,7 +43,15 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else {
 
-            String token = request.getHeader("Authorization");
+            String token = null;
+
+            if (request.getRequestURI().equals(Constants.EXPORT_URI)) {
+                //从请求路径中获取token
+                token = request.getParameter("Authorization");
+            } else {
+                //从请求头中获取token
+                token = request.getHeader(Constants.TOKEN_HEADER);
+            }
             if (!StringUtils.hasText(token)) {
                 //token验证未通过的统一结果
                 R result = R.FAIL(CodeEnum.TOKEN_IS_EMPTY);

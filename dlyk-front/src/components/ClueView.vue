@@ -86,8 +86,8 @@
 
 <script>
 import {defineComponent} from "vue";
-import {doGet, doPost} from "../http/httpRequest.js";
-import {messageTip} from "../util/util.js";
+import {doDelete, doGet, doPost} from "../http/httpRequest.js";
+import {messageConfirm, messageTip} from "../util/util.js";
 
 export default defineComponent({
   name: 'ClueView',
@@ -127,10 +127,16 @@ export default defineComponent({
       this.$router.push('/dashboard/clue/edit/' + id)
     },
     del(id) {
-      this.$confirm('确认删除该线索？').then(() => {
-        // 删除逻辑
-      }).catch(() => {
-      });
+      messageConfirm("确定删除该线索吗？").then(() => {
+        doDelete("/api/clue/" + id).then(response => {
+          if (response.data.code === 200) {
+            messageTip("删除成功", "success")
+            this.getData(1);
+          } else {
+            messageTip("删除失败：" + response.data.msg, "error")
+          }
+        })
+      })
     },
     getData(current) {
       doGet("/api/clues", {current: current}).then(response => {

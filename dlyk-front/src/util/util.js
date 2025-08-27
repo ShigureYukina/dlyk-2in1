@@ -55,3 +55,22 @@ export function messageConfirm(msg) {
 export function goback() {
     this.$router.go(-1);
 }
+
+//获取token方法
+export function getToken() {
+    // 在发送请求之前做些什么，在请求头中放一个token（jwt），传给后端接口
+    let token = window.sessionStorage.getItem(getTokenName());
+    if (!token) { //前面加了一个！，表示token不存在，token是空的，token没有值，这个意思
+        token = window.localStorage.getItem(getTokenName());
+    }
+    if (token) { //表示token存在，token不是空的，token有值，这个意思
+        return token
+    } else {
+        messageConfirm('请求token为空，是否重新登录').then(() => {
+            removeToken();
+            window.location.href = "/";
+        }).catch(() => {
+            messageTip('取消去登录', 'warning')
+        });
+    }
+}

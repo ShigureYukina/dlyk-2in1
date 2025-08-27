@@ -2,6 +2,8 @@ package com.dlyk.mapper;
 
 import com.dlyk.model.TCustomer;
 
+import java.util.List;
+
 public interface TCustomerMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,8 @@ public interface TCustomerMapper {
     int updateByPrimaryKeySelective(TCustomer record);
 
     int updateByPrimaryKey(TCustomer record);
+
+    List<TCustomer> selectCustomerPage();
+
+    List<TCustomer> selectCustomerExcel(List<Integer> idList);
 }

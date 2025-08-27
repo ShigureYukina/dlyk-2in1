@@ -1,17 +1,17 @@
 package com.dlyk.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.ObjectUtils;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 用户表
@@ -105,6 +105,15 @@ public class TUser implements UserDetails, Serializable {
      * 权限标识符List
      */
     private List<String> permissionList;
+    /**
+     * 权限标识符List
+     */
+    private List<TPermission> menuPermissionList;
+    /**
+     * 权限标识符List
+     */
+    private List<String> ButtonPermissionList;
+
 
     /**
      * 一对一关联
@@ -121,12 +130,12 @@ public class TUser implements UserDetails, Serializable {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> list = new ArrayList<>();
         //角色
-        if (!ObjectUtils.isEmpty(this.getRoleList()))  {
+        if (!ObjectUtils.isEmpty(this.getRoleList())) {
             this.getRoleList().forEach(role -> {
                 list.add(new SimpleGrantedAuthority(role));
             });
         }
-        if (!ObjectUtils.isEmpty(this.getPermissionList()))  {
+        if (!ObjectUtils.isEmpty(this.getPermissionList())) {
             //权限标识符
             this.getPermissionList().forEach(permission -> {
                 list.add(new SimpleGrantedAuthority(permission));

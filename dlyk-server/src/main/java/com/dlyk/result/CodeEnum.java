@@ -20,7 +20,10 @@ public enum CodeEnum {
 
     TOKEN_IS_NONE_MATCH(904, "请求Token不匹配"),
 
-    USER_LOGOUT("退出成功"),;
+    ACCESS_DENIED(500, "无访问权限"),
+
+    USER_LOGOUT("退出成功"),
+    ;
 
     //结果码
     private int code;

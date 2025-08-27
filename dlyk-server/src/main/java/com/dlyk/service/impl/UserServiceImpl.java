@@ -2,8 +2,10 @@ package com.dlyk.service.impl;
 
 import com.dlyk.constant.Constants;
 import com.dlyk.manager.RedisManager;
+import com.dlyk.mapper.TPermissionMapper;
 import com.dlyk.mapper.TRoleMapper;
 import com.dlyk.mapper.TUserMapper;
+import com.dlyk.model.TPermission;
 import com.dlyk.model.TRole;
 import com.dlyk.model.TUser;
 import com.dlyk.query.BaseQuery;
@@ -34,6 +36,8 @@ public class UserServiceImpl implements UserService {
     private TRoleMapper tRoleMapper;
     @Resource
     private PasswordEncoder passwordEncoder;
+    @Resource
+    private TPermissionMapper tPermissionMapper;
 
     @Resource
     private RedisManager redisManager;
@@ -57,6 +61,17 @@ public class UserServiceImpl implements UserService {
             }
         });
         tUser.setRoleList(stringRoleList);
+        //查询用户菜单权限
+        List<TPermission> tPermissionList = tPermissionMapper.selectMenuPermissionByUserId(tUser.getId());
+        tUser.setMenuPermissionList(tPermissionList);
+        //查询用户按钮权限
+        List<TPermission> tButtonPermissionList = tPermissionMapper.selectButtonPermissionByUserId(tUser.getId());
+        List<String> stringPermissionList = new ArrayList<>();
+        tButtonPermissionList.forEach(tPermission -> {
+            stringPermissionList.add(tPermission.getCode());
+        });
+        tUser.setButtonPermissionList(stringPermissionList);
+
         return tUser;
     }
 

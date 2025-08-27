@@ -1,5 +1,6 @@
 package com.dlyk.config.handler;
 
+import com.dlyk.result.CodeEnum;
 import com.dlyk.result.R;
 import com.dlyk.util.JSONUtils;
 import com.dlyk.util.ResponseUtils;
@@ -25,7 +26,7 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
         System.out.println("权限不足..." + accessDeniedException.getMessage());
 
         //登录失败的统一结果
-        R result = R.FAIL(accessDeniedException.getMessage());
+        R result = R.FAIL(CodeEnum.ACCESS_DENIED);
 
         //把R对象转成json
         String resultJSON = JSONUtils.toJSON(result);
