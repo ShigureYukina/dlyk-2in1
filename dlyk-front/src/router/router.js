@@ -28,6 +28,12 @@ let router = createRouter({
             children: [
                 {
                     //子路由路径
+                    path: '',
+                    //子路由路径所对应的页面
+                    component: () => import('../components/StatisticView.vue'),
+                },
+                {
+                    //子路由路径
                     path: 'user',
                     //子路由路径所对应的页面
                     component: () => import('../components/UserView.vue'),

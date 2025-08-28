@@ -166,4 +166,30 @@
       edit_by = #{editBy,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>
+  
+  <!-- 查询成功的交易额 -->
+  <select id="selectSuccessTranAmount" resultType="java.math.BigDecimal">
+    SELECT COALESCE(SUM(money), 0) 
+    FROM t_tran 
+    WHERE stage = 42
+  </select>
+  
+  <!-- 查询总的交易额（包含成功和不成功的） -->
+  <select id="selectTotalTranAmount" resultType="java.math.BigDecimal">
+    SELECT COALESCE(SUM(money), 0) 
+    FROM t_tran
+  </select>
+  
+  <!-- 查询总的交易人数 -->
+  <select id="selectTotalTranCount" resultType="int">
+    SELECT COUNT(DISTINCT customer_id)
+    FROM t_tran
+  </select>
+  
+  <!-- 查询成功的交易人数 -->
+  <select id="selectSuccessTranCount" resultType="int">
+    SELECT COUNT(DISTINCT customer_id)
+    FROM t_tran
+    WHERE stage = 42
+  </select>
 </mapper>
