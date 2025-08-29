@@ -1,8 +1,10 @@
 package com.dlyk.service.impl;
 
 import com.dlyk.manager.StatisticsManager;
+import com.dlyk.result.BarChartData;
 import com.dlyk.result.NameValue;
 import com.dlyk.result.SummaryData;
+import com.dlyk.result.TranBarChartData;
 import com.dlyk.service.StatisticsService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -23,5 +25,30 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public List<NameValue> loadSaleFunnelData() {
         return statisticsManager.loadSaleFunnelData();
+    }
+
+    @Override
+    public List<NameValue> loadSourcePieData() {
+        return statisticsManager.loadSourcePieData();
+    }
+
+    @Override
+    public List<Integer> loadActivityBarData() {
+        return statisticsManager.loadActivityBarData();
+    }
+
+    @Override
+    public BarChartData loadClueBarData() {
+        return statisticsManager.loadClueBarData();
+    }
+
+    @Override
+    public BarChartData loadCustomerBarData() {
+        return statisticsManager.loadCustomerBarData();
+    }
+
+    @Override
+    public TranBarChartData loadTranBarData() {
+        return statisticsManager.loadTranBarData();
     }
 }

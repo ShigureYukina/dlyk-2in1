@@ -26,4 +26,9 @@ public interface TActivityMapper {
     int deleteByIds(@Param("idList") List<String> idList);
 
     List<TActivity> selectOngoingActivity();
+
+    /**
+     * 按月统计市场活动数量
+     */
+    List<Integer> selectActivityStatsByMonth();
 }

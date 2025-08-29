@@ -1,7 +1,9 @@
 package com.dlyk.mapper;
 
 import com.dlyk.model.TTran;
+import com.dlyk.result.TranStatsData;
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface TTranMapper {
     int deleteByPrimaryKey(Integer id);
@@ -27,4 +29,9 @@ public interface TTranMapper {
     
     // 查询成功的交易人数
     int selectSuccessTranCount();
+    
+    /**
+     * 按负责人统计交易数据
+     */
+    List<TranStatsData> selectTranStatsByOwner();
 }

@@ -238,4 +238,24 @@
             edit_by     = #{editBy,jdbcType=INTEGER}
         where id = #{id,jdbcType=INTEGER}
     </update>
+    
+    <!-- 按月统计市场活动数量 -->
+    <select id="selectActivityStatsByMonth" resultType="java.lang.Integer">
+        SELECT
+            COALESCE(month_data.activity_count, 0) as count
+        FROM (
+            SELECT 1 as month_num UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION
+            SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION
+            SELECT 9 UNION SELECT 10 UNION SELECT 11 UNION SELECT 12
+        ) months
+        LEFT JOIN (
+            SELECT
+                MONTH(start_time) as month_num,
+                COUNT(*) as activity_count
+            FROM t_activity
+            WHERE YEAR(start_time) = YEAR(CURDATE())
+            GROUP BY MONTH(start_time)
+        ) month_data ON months.month_num = month_data.month_num
+        ORDER BY months.month_num
+    </select>
 </mapper>

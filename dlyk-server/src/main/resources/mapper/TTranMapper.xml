@@ -192,4 +192,23 @@
     FROM t_tran
     WHERE stage = 42
   </select>
+  
+  <!-- 按负责人统计交易数据 -->
+  <select id="selectTranStatsByOwner" resultType="com.dlyk.result.TranStatsData">
+    SELECT
+        tu.name as ownerName,
+        COUNT(tt.id) as totalTranCount,
+        COUNT(CASE WHEN tdv.type_value = '成交' THEN 1 END) as successTranCount
+    FROM t_user tu
+    LEFT JOIN t_clue tc ON tu.id = tc.owner_id
+    LEFT JOIN t_customer tcr ON tc.id = tcr.clue_id
+    LEFT JOIN t_tran tt ON tcr.id = tt.customer_id
+    LEFT JOIN t_dic_value tdv ON tt.stage = tdv.id
+    WHERE tu.account_no_expired = 1
+      AND tu.account_no_locked = 1
+      AND tu.credentials_no_expired = 1
+      AND tu.account_enabled = 1
+    GROUP BY tu.id, tu.name
+    ORDER BY COUNT(tt.id) DESC
+  </select>
 </mapper>

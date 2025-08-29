@@ -2,6 +2,7 @@ package com.dlyk.mapper;
 
 import com.dlyk.model.TClue;
 import com.dlyk.query.BaseQuery;
+import com.dlyk.result.NameValue;
 
 import java.util.List;
 
@@ -25,4 +26,14 @@ public interface TClueMapper {
     int selectByPhone(String phone);
 
     TClue selectDetailById(Integer id);
+
+    /**
+     * 统计线索来源分布
+     */
+    List<NameValue> selectClueSourceStats();
+
+    /**
+     * 按负责人统计线索数量
+     */
+    List<NameValue> selectClueStatsByOwner();
 }

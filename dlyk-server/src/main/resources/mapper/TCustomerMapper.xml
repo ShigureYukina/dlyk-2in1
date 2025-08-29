@@ -281,4 +281,20 @@
             edit_by           = #{editBy,jdbcType=INTEGER}
         where id = #{id,jdbcType=INTEGER}
     </update>
+    
+    <!-- 按负责人统计客户数量 -->
+    <select id="selectCustomerStatsByOwner" resultType="com.dlyk.result.NameValue">
+        SELECT
+            tu.name as name,
+            COUNT(tc_customer.id) as value
+        FROM t_user tu
+        LEFT JOIN t_clue tc ON tu.id = tc.owner_id
+        LEFT JOIN t_customer tc_customer ON tc.id = tc_customer.clue_id
+        WHERE tu.account_no_expired = 1
+          AND tu.account_no_locked = 1
+          AND tu.credentials_no_expired = 1
+          AND tu.account_enabled = 1
+        GROUP BY tu.id, tu.name
+        ORDER BY COUNT(tc_customer.id) DESC
+    </select>
 </mapper>

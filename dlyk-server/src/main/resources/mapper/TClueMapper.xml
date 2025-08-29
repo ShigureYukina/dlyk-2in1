@@ -482,4 +482,31 @@
             edit_by           = #{editBy,jdbcType=INTEGER}
         where id = #{id,jdbcType=INTEGER}
     </update>
+    
+    <!-- 统计线索来源分布 -->
+    <select id="selectClueSourceStats" resultType="com.dlyk.result.NameValue">
+        SELECT
+            tv.type_value as name,
+            COUNT(*) as value
+        FROM t_clue tc
+        LEFT JOIN t_dic_value tv ON tc.source = tv.id
+        WHERE tc.source IS NOT NULL
+        GROUP BY tc.source, tv.type_value
+        ORDER BY COUNT(*) DESC
+    </select>
+    
+    <!-- 按负责人统计线索数量 -->
+    <select id="selectClueStatsByOwner" resultType="com.dlyk.result.NameValue">
+        SELECT
+            tu.name as name,
+            COUNT(tc.id) as value
+        FROM t_user tu
+        LEFT JOIN t_clue tc ON tu.id = tc.owner_id
+        WHERE tu.account_no_expired = 1
+          AND tu.account_no_locked = 1
+          AND tu.credentials_no_expired = 1
+          AND tu.account_enabled = 1
+        GROUP BY tu.id, tu.name
+        ORDER BY COUNT(tc.id) DESC
+    </select>
 </mapper>
