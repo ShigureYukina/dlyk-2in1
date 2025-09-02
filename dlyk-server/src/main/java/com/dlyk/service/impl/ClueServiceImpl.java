@@ -12,10 +12,14 @@ import com.dlyk.util.JWTUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -81,5 +85,65 @@ public class ClueServiceImpl implements ClueService {
         tClue.setEditBy(userId);//设置编辑人
 
         return tClueMapper.updateByPrimaryKeySelective(tClue);
+    }
+    
+    @Override
+    public int deleteClue(Integer id) {
+        // 逻辑删除，将deleted字段设置为1
+        TClue tClue = new TClue();
+        tClue.setId(id);
+        tClue.setDeleted(1);
+        return tClueMapper.updateByPrimaryKeySelective(tClue);
+    }
+    
+    @Override
+    public int batchDeleteClue(List<Integer> idList) {
+        if (idList == null || idList.isEmpty()) {
+            return 0;
+        }
+        // 批量逻辑删除
+        return tClueMapper.batchDeleteByIds(idList);
+    }
+    
+    @Override
+    public void exportClueExcel(HttpServletResponse response) throws Exception {
+        // 查询所有线索数据
+        List<TClue> clueList = tClueMapper.selectClueByPage(BaseQuery.builder().build());
+        
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        
+        // 设置文件名
+        String fileName = URLEncoder.encode("线索数据_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()), "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        
+        // 导出数据
+        EasyExcel.write(response.getOutputStream(), TClue.class)
+                .sheet("线索数据")
+                .doWrite(clueList);
+    }
+    
+    @Override
+    public void exportSelectedClue(List<Integer> idList, HttpServletResponse response) throws Exception {
+        if (idList == null || idList.isEmpty()) {
+            throw new RuntimeException("请选择要导出的线索");
+        }
+        
+        // 根据ID列表查询线索数据
+        List<TClue> clueList = tClueMapper.selectCluesByIds(idList);
+        
+        // 设置响应头
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        
+        // 设置文件名
+        String fileName = URLEncoder.encode("线索数据_选中_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()), "UTF-8");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        
+        // 导出数据
+        EasyExcel.write(response.getOutputStream(), TClue.class)
+                .sheet("线索数据")
+                .doWrite(clueList);
     }
 }

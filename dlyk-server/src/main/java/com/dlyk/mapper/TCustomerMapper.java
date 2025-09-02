@@ -26,4 +26,9 @@ public interface TCustomerMapper {
      * 按负责人统计客户数量
      */
     List<NameValue> selectCustomerStatsByOwner();
+    
+    /**
+     * 查询客户详情
+     */
+    TCustomer selectCustomerDetailById(Integer id);
 }

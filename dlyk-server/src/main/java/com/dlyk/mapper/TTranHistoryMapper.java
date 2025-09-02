@@ -2,6 +2,8 @@ package com.dlyk.mapper;
 
 import com.dlyk.model.TTranHistory;
 
+import java.util.List;
+
 public interface TTranHistoryMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,9 @@ public interface TTranHistoryMapper {
     int updateByPrimaryKeySelective(TTranHistory record);
 
     int updateByPrimaryKey(TTranHistory record);
+    
+    /**
+     * 根据交易ID查询历史记录
+     */
+    List<TTranHistory> selectByTranId(Integer tranId);
 }

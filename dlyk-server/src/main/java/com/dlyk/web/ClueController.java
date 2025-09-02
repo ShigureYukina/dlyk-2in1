@@ -2,13 +2,18 @@ package com.dlyk.web;
 
 import com.dlyk.model.TClue;
 import com.dlyk.query.ClueQuery;
+import com.dlyk.query.CustomerQuery;
 import com.dlyk.result.R;
 import com.dlyk.service.ClueService;
+import com.dlyk.service.CustomerService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /** copy by ShigureYukina,from 2025/8/24-下午2:25 */
 @RestController
@@ -16,6 +21,9 @@ public class ClueController {
 
     @Resource
     private ClueService clueService;
+    
+    @Resource
+    private CustomerService customerService;
 
 //    @PreAuthorize(value="hasAnyAuthority('clue:list')")
     @GetMapping(value = "/api/clues")
@@ -65,8 +73,37 @@ public class ClueController {
 //    @PreAuthorize(value="hasAnyAuthority('clue:delete')")
     @DeleteMapping(value = "/api/clue/{id}")
     public R deleteClue(@PathVariable("id") Integer id) {
-        int delete = 1; //clueService.deleteClue(id);
+        int delete = clueService.deleteClue(id);
         return delete >= 1 ? R.OK() : R.FAIL();
+    }
+    
+    //    @PreAuthorize(value="hasAnyAuthority('clue:batchDelete')")
+    @DeleteMapping(value = "/api/clues")
+    public R batchDeleteClue(@RequestBody List<Integer> idList) {
+        int delete = clueService.batchDeleteClue(idList);
+        return delete >= 1 ? R.OK() : R.FAIL();
+    }
+    
+    //    @PreAuthorize(value="hasAnyAuthority('clue:convert')")
+    @PostMapping(value = "/api/clue/convert/{id}")
+    public R convertToCustomer(@PathVariable("id") Integer id, @RequestHeader(value = "Authorization") String token) {
+        CustomerQuery customerQuery = new CustomerQuery();
+        customerQuery.setClueId(id);  // 设置线索ID
+        customerQuery.setToken(token);
+        Boolean result = customerService.convertCustomer(customerQuery);
+        return result ? R.OK() : R.FAIL();
+    }
+    
+    //    @PreAuthorize(value="hasAnyAuthority('clue:export')")
+    @GetMapping(value = "/api/clue/export")
+    public void exportClueExcel(HttpServletResponse response) throws Exception {
+        clueService.exportClueExcel(response);
+    }
+    
+    //    @PreAuthorize(value="hasAnyAuthority('clue:export')")
+    @PostMapping(value = "/api/clue/export/selected")
+    public void exportSelectedClue(@RequestBody List<Integer> idList, HttpServletResponse response) throws Exception {
+        clueService.exportSelectedClue(idList, response);
     }
 
 }

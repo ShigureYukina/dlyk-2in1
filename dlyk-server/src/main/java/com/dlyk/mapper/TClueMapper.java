@@ -36,4 +36,14 @@ public interface TClueMapper {
      * 按负责人统计线索数量
      */
     List<NameValue> selectClueStatsByOwner();
+    
+    /**
+     * 批量逻辑删除线索
+     */
+    int batchDeleteByIds(List<Integer> idList);
+    
+    /**
+     * 根据ID列表查询线索
+     */
+    List<TClue> selectCluesByIds(List<Integer> idList);
 }

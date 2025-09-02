@@ -3,9 +3,13 @@ package com.dlyk.web;
 import com.alibaba.excel.EasyExcel;
 import com.dlyk.model.TCustomer;
 import com.dlyk.query.CustomerQuery;
+import com.dlyk.query.CustomerRemarkQuery;
+import com.dlyk.query.TranQuery;
 import com.dlyk.result.CustomerExcel;
 import com.dlyk.result.R;
 import com.dlyk.service.CustomerService;
+import com.dlyk.service.CustomerRemarkService;
+import com.dlyk.service.TranService;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,6 +26,12 @@ import java.util.stream.Collectors;
 public class CustomerController {
     @Resource
     private CustomerService customerService;
+    
+    @Resource
+    private CustomerRemarkService customerRemarkService;
+    
+    @Resource
+    private TranService tranService;
 
     @PostMapping(value = "/api/clue/customer/")
     public R convertCustomer(@RequestBody CustomerQuery customerquery, @RequestHeader("Authorization") String token) {
@@ -29,15 +39,47 @@ public class CustomerController {
         Boolean convert = customerService.convertCustomer(customerquery);
         return convert ? R.OK() : R.FAIL();
     }
-
+    
     @GetMapping(value = "/api/customers")
-    public R cluePage(@RequestParam(value = "current", required = false) Integer current) {
+    public R customerPage(@RequestParam(value = "current", required = false) Integer current) {
         if (current == null) {
             current = 1;
         }
-
         PageInfo<TCustomer> pageInfo = customerService.getCustomerByPage(current);
         return R.OK(pageInfo);
+    }
+    
+    @GetMapping(value = "/api/customer/{id}")
+    public R getCustomerDetail(@PathVariable("id") Integer id) {
+        TCustomer customer = customerService.getCustomerDetail(id);
+        return customer != null ? R.OK(customer) : R.FAIL();
+    }
+    
+    @PostMapping(value = "/api/customer/remark")
+    public R addCustomerRemark(@RequestBody CustomerRemarkQuery customerRemarkQuery, @RequestHeader("Authorization") String token) {
+        customerRemarkQuery.setToken(token);
+        int save = customerRemarkService.addCustomerRemark(customerRemarkQuery);
+        return save >= 1 ? R.OK() : R.FAIL();
+    }
+    
+    @GetMapping(value = "/api/customer/remark")
+    public R getCustomerRemarkList(@RequestParam(value = "current", required = false) Integer current,
+                                   @RequestParam(value = "customerId") Integer customerId) {
+        if (current == null) {
+            current = 1;
+        }
+        PageInfo pageInfo = customerRemarkService.getCustomerRemarkPage(current, customerId);
+        return R.OK(pageInfo);
+    }
+    
+    @PostMapping(value = "/api/customer/{id}/transaction")
+    public R createTransaction(@PathVariable("id") Integer customerId, 
+                              @RequestBody TranQuery tranQuery, 
+                              @RequestHeader("Authorization") String token) {
+        tranQuery.setCustomerId(customerId);
+        tranQuery.setToken(token);
+        int result = tranService.addTran(tranQuery);
+        return result >= 1 ? R.OK() : R.FAIL();
     }
 
 

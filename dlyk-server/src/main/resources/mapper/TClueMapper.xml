@@ -26,6 +26,7 @@
         <result column="create_by" jdbcType="INTEGER" property="createBy"/>
         <result column="edit_time" jdbcType="TIMESTAMP" property="editTime"/>
         <result column="edit_by" jdbcType="INTEGER" property="editBy"/>
+        <result column="deleted" jdbcType="INTEGER" property="deleted"/>
     </resultMap>
     <resultMap id="ClueResultMap" type="com.dlyk.model.TClue">
         <id column="id" jdbcType="INTEGER" property="id"/>
@@ -97,7 +98,7 @@
     <sql id="Base_Column_List">
         id, owner_id, activity_id, full_name, appellation, phone, weixin, qq, email, age,
     job, year_income, address, need_loan, intention_state, intention_product, `state`, 
-    `source`, description, next_contact_time, create_time, create_by, edit_time, edit_by
+    `source`, description, next_contact_time, create_time, create_by, edit_time, edit_by, deleted
     </sql>
 
     <select id="selectClueByPage" parameterType="java.lang.Integer" resultMap="ClueResultMap">
@@ -133,6 +134,7 @@
                  left join t_dic_value tdv5 on tc.source = tdv5.id
 
                  left join t_product tp on tc.intention_product = tp.id
+        WHERE tc.deleted = 0 OR tc.deleted IS NULL
     </select>
 
     <select id="selectByPhone" parameterType="java.lang.String" resultType="java.lang.Integer">
@@ -508,5 +510,59 @@
           AND tu.account_enabled = 1
         GROUP BY tu.id, tu.name
         ORDER BY COUNT(tc.id) DESC
+    </select>
+    
+    <!-- 批量逻辑删除线索 -->
+    <update id="batchDeleteByIds" parameterType="java.util.List">
+        <if test="list != null and list.size() > 0">
+            UPDATE t_clue SET deleted = 1
+            WHERE id IN
+            <foreach collection="list" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </update>
+    
+    <!-- 根据ID列表查询线索 -->
+    <select id="selectCluesByIds" parameterType="java.util.List" resultMap="ClueResultMap">
+        <if test="list != null and list.size() > 0">
+            select tc.*,
+                   tu1.id          ownerId,
+                   tu1.name        ownerName,
+
+                   ta.id           activityId,
+                   ta.name         activityName,
+
+                   tdv.id          appellationId,
+                   tdv.type_value  appellationName,
+                   tdv2.id         needLoanId,
+                   tdv2.type_value needLoanName,
+                   tdv3.id         intentionStateId,
+                   tdv3.type_value intentionStateName,
+                   tdv4.id         stateId,
+                   tdv4.type_value stateName,
+                   tdv5.id         sourceId,
+                   tdv5.type_value sourceName,
+
+                   tp.id           intentionProductId,
+                   tp.name         intentionProductName
+
+            from t_clue tc
+                     left join t_user tu1 on tc.owner_id = tu1.id
+                     left join t_activity ta on tc.activity_id = ta.id
+
+                     left join t_dic_value tdv on tc.appellation = tdv.id
+                     left join t_dic_value tdv2 on tc.need_loan = tdv2.id
+                     left join t_dic_value tdv3 on tc.intention_state = tdv3.id
+                     left join t_dic_value tdv4 on tc.state = tdv4.id
+                     left join t_dic_value tdv5 on tc.source = tdv5.id
+
+                     left join t_product tp on tc.intention_product = tp.id
+            WHERE tc.id IN
+            <foreach collection="list" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            AND (tc.deleted = 0 OR tc.deleted IS NULL)
+        </if>
     </select>
 </mapper>

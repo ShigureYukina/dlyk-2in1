@@ -1,6 +1,7 @@
 package com.dlyk.mapper;
 
 import com.dlyk.model.TTran;
+import com.dlyk.query.TranQuery;
 import com.dlyk.result.TranStatsData;
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,4 +35,14 @@ public interface TTranMapper {
      * 按负责人统计交易数据
      */
     List<TranStatsData> selectTranStatsByOwner();
+    
+    /**
+     * 分页查询交易列表
+     */
+    List<TTran> selectTranPage(TranQuery tranQuery);
+    
+    /**
+     * 查询交易详情
+     */
+    TTran selectTranDetailById(Integer id);
 }

@@ -26,11 +26,17 @@ public class CustomerManager {
     @Transactional(rollbackFor = Exception.class)
     public Boolean convertCustomer(CustomerQuery customerquery) {
         TClue tclue = tClueMapper.selectByPrimaryKey(customerquery.getClueId());
+        if (tclue == null) {
+            throw new RuntimeException("线索不存在");
+        }
         if (tclue.getState() == -1) {
             throw new RuntimeException("该线索已被转换");
         }
+        
         TCustomer tCustomer = new TCustomer();
-
+        // 从线索信息中复制基本信息到客户
+        tCustomer.setClueId(tclue.getId());
+        
         // 把CustomerQuery对象里的属性数据复制到TCustomer 对象里去
         BeanUtils.copyProperties(customerquery, tCustomer);
         tCustomer.setCreateTime(new Date()); // 创建时间
@@ -41,11 +47,10 @@ public class CustomerManager {
 
         int insert = tCustomerMapper.insertSelective(tCustomer);
 
-        // 更新线索状态
+        // 更新线索状态为已转换
         tclue.setState(-1);
         int update = tClueMapper.updateByPrimaryKeySelective(tclue);
 
         return update >= 1 && insert >= 1;
-
     }
 }

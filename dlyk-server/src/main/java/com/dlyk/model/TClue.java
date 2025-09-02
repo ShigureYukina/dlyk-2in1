@@ -159,6 +159,11 @@ public class TClue implements Serializable {
     private Integer editBy;
 
     /**
+     * 删除标记（逻辑删除，0未删除，1已删除）
+     */
+    private Integer deleted = 0;
+
+    /**
      * 一对一关联8个对象
      */
     private TUser ownerDO = new TUser();

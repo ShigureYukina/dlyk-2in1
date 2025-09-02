@@ -2,6 +2,8 @@ package com.dlyk.mapper;
 
 import com.dlyk.model.TTranRemark;
 
+import java.util.List;
+
 public interface TTranRemarkMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,9 @@ public interface TTranRemarkMapper {
     int updateByPrimaryKeySelective(TTranRemark record);
 
     int updateByPrimaryKey(TTranRemark record);
+    
+    /**
+     * 根据交易ID查询备注列表
+     */
+    List<TTranRemark> selectByTranId(Integer tranId);
 }

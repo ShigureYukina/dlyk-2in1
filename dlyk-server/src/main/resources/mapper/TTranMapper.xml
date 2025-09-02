@@ -211,4 +211,92 @@
     GROUP BY tu.id, tu.name
     ORDER BY COUNT(tt.id) DESC
   </select>
+  
+  <!-- 扩展的ResultMap，包含关联查询信息 -->
+  <resultMap id="TranDetailResultMap" type="com.dlyk.model.TTran">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="tran_no" jdbcType="VARCHAR" property="tranNo" />
+    <result column="customer_id" jdbcType="INTEGER" property="customerId" />
+    <result column="money" jdbcType="DECIMAL" property="money" />
+    <result column="expected_date" jdbcType="TIMESTAMP" property="expectedDate" />
+    <result column="stage" jdbcType="INTEGER" property="stage" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="next_contact_time" jdbcType="TIMESTAMP" property="nextContactTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_by" jdbcType="INTEGER" property="createBy" />
+    <result column="edit_time" jdbcType="TIMESTAMP" property="editTime" />
+    <result column="edit_by" jdbcType="INTEGER" property="editBy" />
+    <!-- 可以根据需要添加关联对象的映射 -->
+  </resultMap>
+  
+  <!-- 分页查询交易列表 -->
+  <select id="selectTranPage" parameterType="com.dlyk.query.TranQuery" resultMap="TranDetailResultMap">
+    SELECT 
+        tt.id,
+        tt.tran_no,
+        tt.customer_id,
+        tt.money,
+        tt.expected_date,
+        tt.stage,
+        tt.description,
+        tt.next_contact_time,
+        tt.create_time,
+        tt.create_by,
+        tt.edit_time,
+        tt.edit_by
+    FROM t_tran tt
+    LEFT JOIN t_customer tc ON tt.customer_id = tc.id
+    LEFT JOIN t_clue tcl ON tc.clue_id = tcl.id
+    <where>
+      <if test="id != null">
+        AND tt.id = #{id,jdbcType=INTEGER}
+      </if>
+      <if test="customerId != null">
+        AND tt.customer_id = #{customerId,jdbcType=INTEGER}
+      </if>
+      <if test="tranNo != null and tranNo != ''">
+        AND tt.tran_no LIKE CONCAT('%', #{tranNo,jdbcType=VARCHAR}, '%')
+      </if>
+      <if test="money != null">
+        AND tt.money = #{money,jdbcType=DECIMAL}
+      </if>
+      <if test="expectedDate != null and expectedDate != ''">
+        AND DATE(tt.expected_date) = #{expectedDate,jdbcType=VARCHAR}
+      </if>
+      <if test="stage != null">
+        AND tt.stage = #{stage,jdbcType=INTEGER}
+      </if>
+      <if test="description != null and description != ''">
+        AND tt.description LIKE CONCAT('%', #{description,jdbcType=VARCHAR}, '%')
+      </if>
+      <if test="ownerId != null">
+        AND tcl.owner_id = #{ownerId,jdbcType=INTEGER}
+      </if>
+      <if test="nextContactTime != null">
+        AND DATE(tt.next_contact_time) = DATE(#{nextContactTime,jdbcType=TIMESTAMP})
+      </if>
+    </where>
+    ORDER BY tt.create_time DESC
+  </select>
+  
+  <!-- 查询交易详情 -->
+  <select id="selectTranDetailById" parameterType="java.lang.Integer" resultMap="TranDetailResultMap">
+    SELECT 
+        tt.id,
+        tt.tran_no,
+        tt.customer_id,
+        tt.money,
+        tt.expected_date,
+        tt.stage,
+        tt.description,
+        tt.next_contact_time,
+        tt.create_time,
+        tt.create_by,
+        tt.edit_time,
+        tt.edit_by
+    FROM t_tran tt
+    LEFT JOIN t_customer tc ON tt.customer_id = tc.id
+    LEFT JOIN t_clue tcl ON tc.clue_id = tcl.id
+    WHERE tt.id = #{id,jdbcType=INTEGER}
+  </select>
 </mapper>

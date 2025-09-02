@@ -89,6 +89,11 @@ let router = createRouter({
                     path: 'customer',
                     component: () => import('../components/CustomerView.vue'),
                 },
+                {
+                    //子路由路径
+                    path: 'tran',
+                    component: () => import('../components/TransactionView.vue'),
+                },
 
             ]
         },
