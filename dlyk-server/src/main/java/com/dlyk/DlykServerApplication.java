@@ -27,6 +27,10 @@ public class DlykServerApplication implements CommandLineRunner {
     public static final Map<String, Object> cacheMap = new HashMap<>();
 
     public static void main(String[] args) {
+        // 设置系统属性以确保控制台正确显示中文
+        System.setProperty("file.encoding", "UTF-8");
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        
         ConfigurableApplicationContext context = SpringApplication.run(DlykServerApplication.class, args);
 
         String[] beanNamesForType = context.getBeanNamesForType(Executor.class);

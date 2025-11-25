@@ -1,5 +1,6 @@
 package com.dlyk.service.impl;
 
+import com.dlyk.config.CacheRefreshConfig;
 import com.dlyk.constant.Constants;
 import com.dlyk.mapper.TActivityMapper;
 import com.dlyk.model.TActivity;
@@ -10,7 +11,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -20,8 +24,12 @@ import java.util.List;
 public class ActivityServiceImpl implements ActivityService {
     @Resource
     private TActivityMapper tActivityMapper;
+    
+    @Resource
+    private CacheRefreshConfig cacheRefreshConfig;
 
     @Override
+    @Cacheable(value = "activityCache", keyGenerator = "cacheKeyGenerator", cacheManager = "redisCacheManager")
     public PageInfo<TActivity> getActivityByPage(Integer current, ActivityQuery activityquery) {
         // 1.设置PageHelper
         PageHelper.startPage(current, Constants.PAGE_SIZE);
@@ -34,6 +42,8 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = {"activityCache", "ongoingActivityCache"}, allEntries = true)
     public int saveActivity(ActivityQuery activityQuery) {
 
         TActivity tActivity = new TActivity();
@@ -47,15 +57,25 @@ public class ActivityServiceImpl implements ActivityService {
 
         tActivity.setCreateBy(userId);//设置创建人
 
-        return tActivityMapper.insertSelective(tActivity);
+        int result = tActivityMapper.insertSelective(tActivity);
+        
+        // 确保事务提交后清除缓存
+        if (result > 0) {
+            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
+        }
+        
+        return result;
     }
 
     @Override
+    @Cacheable(value = "activityCache", keyGenerator = "cacheKeyGenerator", cacheManager = "redisCacheManager")
     public TActivity getActivityById(Integer id) {
         return tActivityMapper.selectByPrimaryKey(id);
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = {"activityCache", "ongoingActivityCache"}, allEntries = true)
     public int updateActivity(ActivityQuery activityQuery) {
 
         TActivity tActivity = new TActivity();
@@ -67,20 +87,46 @@ public class ActivityServiceImpl implements ActivityService {
         Integer userId = JWTUtils.parseUserFromJWT(activityQuery.getToken()).getId();
         tActivity.setEditBy(userId);//设置编辑人
 
-        return tActivityMapper.updateByPrimaryKeySelective(tActivity);
+        int result = tActivityMapper.updateByPrimaryKeySelective(tActivity);
+        
+        // 确保事务提交后清除缓存
+        if (result > 0) {
+            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
+        }
+        
+        return result;
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = {"activityCache", "ongoingActivityCache"}, allEntries = true)
     public int deleteActivity(Integer id) {
-        return tActivityMapper.deleteByPrimaryKey(id);
+        int result = tActivityMapper.deleteByPrimaryKey(id);
+        
+        // 确保事务提交后清除缓存
+        if (result > 0) {
+            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
+        }
+        
+        return result;
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = {"activityCache", "ongoingActivityCache"}, allEntries = true)
     public int batchDeleteActivityByIds(List<String> idList) {
-        return tActivityMapper.deleteByIds(idList);
+        int result = tActivityMapper.deleteByIds(idList);
+        
+        // 确保事务提交后清除缓存
+        if (result > 0) {
+            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
+        }
+        
+        return result;
     }
 
     @Override
+    @Cacheable(value = "ongoingActivityCache", key = "'all'", cacheManager = "redisCacheManager")
     public List<TActivity> getOngoingActivity() {
         return tActivityMapper.selectOngoingActivity();
     }
