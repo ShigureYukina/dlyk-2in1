@@ -16,4 +16,6 @@ public interface CustomerService {
 	List<CustomerExcel> getCustomerByExcel(List<Integer> idList);
 	
 	TCustomer getCustomerDetail(Integer id);
+
+	int deleteCustomer(Integer id);
 }

@@ -31,4 +31,9 @@ public interface TCustomerMapper {
      * 查询客户详情
      */
     TCustomer selectCustomerDetailById(Integer id);
+
+    /**
+     * 逻辑删除客户(deleted 置 1)
+     */
+    int logicalDeleteById(Integer id);
 }

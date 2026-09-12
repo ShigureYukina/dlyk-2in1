@@ -454,6 +454,9 @@
             <if test="editBy != null">
                 edit_by = #{editBy,jdbcType=INTEGER},
             </if>
+            <if test="deleted != null">
+                deleted = #{deleted,jdbcType=INTEGER},
+            </if>
         </set>
         where id = #{id,jdbcType=INTEGER}
     </update>

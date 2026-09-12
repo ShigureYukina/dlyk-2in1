@@ -93,6 +93,12 @@ public class CustomerServiceImpl implements CustomerService {
     public TCustomer getCustomerDetail(Integer id) {
         return tCustomerMapper.selectCustomerDetailById(id);
     }
+
+    @Override
+    public int deleteCustomer(Integer id) {
+        // 逻辑删除，与线索模块保持一致
+        return tCustomerMapper.logicalDeleteById(id);
+    }
 }
 
 

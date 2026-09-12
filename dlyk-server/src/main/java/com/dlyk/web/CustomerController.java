@@ -54,6 +54,12 @@ public class CustomerController {
         TCustomer customer = customerService.getCustomerDetail(id);
         return customer != null ? R.OK(customer) : R.FAIL();
     }
+
+    @DeleteMapping(value = "/api/customer/{id}")
+    public R deleteCustomer(@PathVariable("id") Integer id) {
+        int del = customerService.deleteCustomer(id);
+        return del >= 1 ? R.OK() : R.FAIL();
+    }
     
     @PostMapping(value = "/api/customer/remark")
     public R addCustomerRemark(@RequestBody CustomerRemarkQuery customerRemarkQuery, @RequestHeader("Authorization") String token) {
