@@ -372,3 +372,10 @@ dist/
 !.vscode/
 
 # End of https://www.toptal.com/developers/gitignore/api/java,java-web,maven,node,visualstudiocode,intellij+all,jetbrains+all,redis
+# ==================== 压测产物 ====================
+# JMeter 发行包 87MB，可用 tools/jmeter/Dockerfile 注释里的命令重新下载
+tools/jmeter/apache-jmeter.tgz
+tools/jmeter/result*.jtl
+tools/jmeter/report/
+tools/jmeter/jmeter.log
+tools/load/__pycache__/
