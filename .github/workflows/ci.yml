@@ -1,0 +1,62 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    # 被测系统的测试是 @SpringBootTest 级别：起的是完整上下文，必须连真实 MySQL 与 Redis。
+    # 单元测试跑不起来的话，"20 线程并发转换只产生一条客户"这类一致性用例就永远只是本地跑过一次。
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: dlyk
+          TZ: Asia/Shanghai
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      # dlyk.sql 里含建库后的全部表结构与基础字典数据，t_clue/t_customer 的 deleted 列
+      # 也已在建表语句中，一次导入即可用于测试。
+      - name: Import schema
+        run: mysql -h 127.0.0.1 -uroot -proot --default-character-set=utf8mb4 dlyk < dlyk.sql
+
+      - name: Test
+        working-directory: dlyk-server
+        env:
+          # 连的是 service 容器，密码用 CI 专用值，覆盖 application.yml 里的本地配置
+          SPRING_DATASOURCE_PASSWORD: root
+          # 关掉调度中心与 MQ：测试不依赖它们，开着只会让启动期反复重连
+          XXL_JOB_ENABLED: "false"
+          DLYK_MQ_ENABLED: "false"
+        run: mvn -B test
