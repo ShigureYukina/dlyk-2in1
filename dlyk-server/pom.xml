@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.bjpowernode</groupId>
+    <groupId>io.github.shigureyukina</groupId>
     <artifactId>dlyk-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
@@ -41,10 +41,15 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!--
+          MyBatis-Plus：在 MyBatis 之上提供通用 CRUD 与条件构造器。
+          项目原有的 @Mapper 接口 + XML 映射全部继续可用（MP 兼容原生 MyBatis），
+          只有需要通用 CRUD 的新 Mapper 才继承 BaseMapper。
+        -->
         <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter</artifactId>
-            <version>3.0.3</version>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <version>3.5.7</version>
         </dependency>
 
         <dependency>
@@ -78,11 +83,34 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- pagehelper分页依赖 -->
+        <!--
+          PageHelper 分页依赖
+
+          版本必须与 MyBatis-Plus 传递进来的 jsqlparser 4.9 对齐：
+          1.4.7 依赖 jsqlparser 3.x 的 SelectBody，而该类在 jsqlparser 4.7 已被移除，
+          混用会在启动时抛 NoClassDefFoundError。
+        -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
-            <version>1.4.7</version>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!--
+          显式钉住 jsqlparser 版本。
+
+          MyBatis-Plus 3.5.7 传递进来的是 jsqlparser 4.9，而 PageHelper 6.0.0
+          依赖的是 4.5：SelectBody 这个类在 jsqlparser 4.7 被移除，
+          PageHelper 的 AbstractDialect 仍在引用它，版本被顶高后分页查询会抛
+          NoClassDefFoundError。
+
+          本项目的 SQL 改写只由 PageHelper 做（未启用 MP 的 PaginationInnerInterceptor），
+          因此把 jsqlparser 钉回 PageHelper 需要的 4.5 是安全的。
+        -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>4.5</version>
         </dependency>
 
         <!-- alibaba的easyexcel依赖 -->
@@ -104,6 +132,38 @@
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>
             <version>4.2.1</version>
+        </dependency>
+
+        <!-- ===== 高并发治理与分布式调度 ===== -->
+
+        <!-- Redisson: Redis 分布式锁 / 看门狗续期 -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.27.2</version>
+        </dependency>
+
+        <!-- XXL-Job: 分布式任务调度（失败重试 + 分片广播） -->
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-core</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+
+        <!-- RabbitMQ: 事件异步化解耦 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- ===== 可观测性 ===== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
     </dependencies>

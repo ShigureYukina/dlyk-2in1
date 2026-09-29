@@ -1,5 +1,7 @@
 package com.dlyk.config.handler;
 
+import com.dlyk.exception.DuplicateRequestException;
+import com.dlyk.result.CodeEnum;
 import com.dlyk.result.R;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,5 +33,16 @@ public class GlobalExceptionHandler {
     public R handlerSQLException(DataAccessException e) {
         e.printStackTrace();
         return R.FAIL("数据库操作失败");
+    }
+
+    /**
+     * 幂等拦截：窗口期内重复提交直接返回 429，不打日志堆栈
+     */
+    @ExceptionHandler(DuplicateRequestException.class)
+    public R handlerDuplicateRequest(DuplicateRequestException e) {
+        return R.builder()
+                .code(CodeEnum.DUPLICATE_REQUEST.getCode())
+                .msg(e.getMessage())
+                .build();
     }
 }

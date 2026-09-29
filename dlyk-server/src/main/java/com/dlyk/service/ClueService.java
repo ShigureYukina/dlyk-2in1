@@ -13,6 +13,15 @@ public interface ClueService {
 
     PageInfo<TClue> getCluePage(Integer current);
 
+    /**
+     * 游标分页查询线索（深分页优化）
+     *
+     * @param lastId 上一页最后一条的 id，为 null 表示查第一页
+     * @param size   每页条数，为空时取默认分页大小
+     * @return 线索列表，按 id 倒序
+     */
+    List<TClue> getCluePageByCursor(Integer lastId, Integer size);
+
     void importExcel(InputStream inputStream,String token);
 
     Boolean checkPhone(String phone);

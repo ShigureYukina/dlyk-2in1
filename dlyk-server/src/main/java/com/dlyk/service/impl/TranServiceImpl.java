@@ -1,5 +1,6 @@
 package com.dlyk.service.impl;
 
+import com.dlyk.cache.ListTotalCache;
 import com.dlyk.constant.Constants;
 import com.dlyk.mapper.TTranHistoryMapper;
 import com.dlyk.mapper.TTranMapper;
@@ -35,28 +36,43 @@ public class TranServiceImpl implements TranService {
     
     @Resource
     private TTranHistoryMapper tTranHistoryMapper;
+
+    @Resource
+    private ListTotalCache listTotalCache;
     
+    /**
+     * 交易列表分页（无筛选条件）。
+     *
+     * <p>无筛选时 total 走单表统计，跳过 PageHelper 对联查 SQL 的 count，
+     * 再走 {@link ListTotalCache} 的 10 秒 TTL 缓存。
+     */
     @Override
     public PageInfo<TTran> getTranPage(Integer current) {
-        // 1.设置PageHelper
-        PageHelper.startPage(current, Constants.PAGE_SIZE);
-        // 2.查询
+        long total = listTotalCache.get("t_tran", tTranMapper::countAll);
+        PageHelper.startPage(current, Constants.PAGE_SIZE, false);
         TranQuery tranQuery = new TranQuery();
         List<TTran> list = tTranMapper.selectTranPage(tranQuery);
-        // 3.封装分页数据到PageInfo
-        return new PageInfo<>(list);
+
+        PageInfo<TTran> info = new PageInfo<>(list);
+        info.setTotal(total);
+        info.setPages((int) ((total + Constants.PAGE_SIZE - 1) / Constants.PAGE_SIZE));
+        return info;
     }
-    
+
+    /**
+     * 交易列表分页（带筛选条件）。
+     *
+     * <p>这里保留 PageHelper 的自动 count：筛选条件可能落在被关联的表上，
+     * 单表统计会算错 total。正确性优先于性能，代价是该接口在筛选时仍偏慢，
+     * 后续可针对具体筛选组合补索引或改成异步计数。
+     */
     @Override
     public PageInfo<TTran> getTranPage(Integer current, TranQuery tranQuery) {
-        // 1.设置PageHelper
         PageHelper.startPage(current, Constants.PAGE_SIZE);
-        // 2.查询
         if (tranQuery == null) {
             tranQuery = new TranQuery();
         }
         List<TTran> list = tTranMapper.selectTranPage(tranQuery);
-        // 3.封装分页数据到PageInfo
         return new PageInfo<>(list);
     }
     

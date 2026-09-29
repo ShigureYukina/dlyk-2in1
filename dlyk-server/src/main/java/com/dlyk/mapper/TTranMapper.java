@@ -40,6 +40,11 @@ public interface TTranMapper {
      * 分页查询交易列表
      */
     List<TTran> selectTranPage(TranQuery tranQuery);
+
+    /**
+     * 交易总数（单表统计，避免对联查 SQL 做 count）
+     */
+    long countAll();
     
     /**
      * 查询交易详情

@@ -20,6 +20,11 @@ public interface TCustomerMapper {
 
     List<TCustomer> selectCustomerPage();
 
+    /**
+     * 存活客户总数（单表统计，避免对联查 SQL 做 count）
+     */
+    long countAlive();
+
     List<TCustomer> selectCustomerExcel(List<Integer> idList);
 
     /**

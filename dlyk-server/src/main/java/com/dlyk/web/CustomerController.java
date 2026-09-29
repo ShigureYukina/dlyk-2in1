@@ -1,6 +1,7 @@
 package com.dlyk.web;
 
 import com.alibaba.excel.EasyExcel;
+import com.dlyk.annotation.Idempotent;
 import com.dlyk.model.TCustomer;
 import com.dlyk.query.CustomerQuery;
 import com.dlyk.query.CustomerRemarkQuery;
@@ -33,6 +34,7 @@ public class CustomerController {
     @Resource
     private TranService tranService;
 
+    @Idempotent(prefix = "customer:convert", key = "#customerquery.clueId", timeout = 30)
     @PostMapping(value = "/api/clue/customer/")
     public R convertCustomer(@RequestBody CustomerQuery customerquery, @RequestHeader("Authorization") String token) {
         customerquery.setToken(token);

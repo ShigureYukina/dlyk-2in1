@@ -112,7 +112,13 @@
                  left join t_dic_value tdv4 on tc.state = tdv4.id
                  left join t_dic_value tdv5 on tc.source = tdv5.id
                  left join t_product tp on tct.product = tp.id
-        where tct.deleted = 0 or tct.deleted is null
+        where tct.deleted = 0
+        order by tct.id desc
+    </select>
+
+    <!-- 列表分页用的单表计数：避免 PageHelper 对 9 表联查做 count -->
+    <select id="countAlive" resultType="long">
+        select count(0) from t_customer where deleted = 0
     </select>
 
     <select id="selectCustomerExcel" resultMap="CustomerResultMap">
@@ -161,7 +167,7 @@
                 </foreach>
                 and
             </if>
-            (tct.deleted = 0 or tct.deleted is null)
+            tct.deleted = 0
         </where>
     </select>
 

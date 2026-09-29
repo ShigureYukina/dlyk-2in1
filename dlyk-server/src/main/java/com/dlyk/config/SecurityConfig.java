@@ -57,6 +57,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers("/api/login").permitAll()
+                            // 监控端点放行：Prometheus 抓取时无法携带业务 JWT
+                            .requestMatchers("/actuator/**").permitAll()
                             .anyRequest().authenticated(); //其它任何请求都需要登录后才能访问
                 })
 

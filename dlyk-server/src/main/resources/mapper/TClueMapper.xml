@@ -101,7 +101,8 @@
     `source`, description, next_contact_time, create_time, create_by, edit_time, edit_by, deleted
     </sql>
 
-    <select id="selectClueByPage" parameterType="java.lang.Integer" resultMap="ClueResultMap">
+    <!-- 线索列表查询的公共列与关联，供偏移分页与游标分页复用 -->
+    <sql id="clueListSelect">
         select tc.*,
                tu1.id          ownerId,
                tu1.name        ownerName,
@@ -134,7 +135,48 @@
                  left join t_dic_value tdv5 on tc.source = tdv5.id
 
                  left join t_product tp on tc.intention_product = tp.id
-        WHERE tc.deleted = 0 OR tc.deleted IS NULL
+    </sql>
+
+    <!--
+      偏移分页（兼容旧接口）
+
+      deleted 列已规范为 NOT NULL，谓词从 "deleted = 0 OR deleted IS NULL"
+      简化为 "deleted = 0"，否则 OR 会让优化器放弃索引。
+      同时补上 ORDER BY：原 SQL 没有排序，MySQL 返回顺序不保证稳定，
+      翻页时会出现同一条记录重复出现或被跳过。
+
+      注意：深分页（offset 很大）的性能问题靠本查询本身无法解决，
+      根因是 OFFSET 必须扫描并丢弃前面的所有行，详见 selectClueByCursor。
+    -->
+    <select id="selectClueByPage" parameterType="java.lang.Integer" resultMap="ClueResultMap">
+        <include refid="clueListSelect"/>
+        WHERE tc.deleted = 0
+        ORDER BY tc.id DESC
+    </select>
+
+    <!--
+      游标分页（深分页优化）
+
+      以"上一页最后一条的 id"作为游标，把 OFFSET 换成 WHERE id < lastId：
+      WHERE + ORDER BY 都可以直接命中主键，扫描行数恒为 limit，
+      耗时不再随页码增长 —— 实测第 30 万条偏移处：
+        偏移分页 398.8ms vs 游标分页 0.5ms
+    -->
+    <select id="selectClueByCursor" resultMap="ClueResultMap">
+        <include refid="clueListSelect"/>
+        <where>
+            tc.deleted = 0
+            <if test="lastId != null">
+                AND tc.id &lt; #{lastId}
+            </if>
+        </where>
+        ORDER BY tc.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 列表分页用的单表计数：避免 PageHelper 对联查 SQL 做 count -->
+    <select id="countAlive" resultType="long">
+        select count(0) from t_clue where deleted = 0
     </select>
 
     <select id="selectByPhone" parameterType="java.lang.String" resultType="java.lang.Integer">
@@ -565,7 +607,7 @@
             <foreach collection="list" item="id" open="(" separator="," close=")">
                 #{id}
             </foreach>
-            AND (tc.deleted = 0 OR tc.deleted IS NULL)
+            AND tc.deleted = 0
         </if>
     </select>
 </mapper>

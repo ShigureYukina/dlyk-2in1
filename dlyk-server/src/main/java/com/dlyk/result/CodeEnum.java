@@ -22,6 +22,8 @@ public enum CodeEnum {
 
     ACCESS_DENIED(500, "无访问权限"),
 
+    DUPLICATE_REQUEST(429, "请勿重复提交，请稍后重试"),
+
     USER_LOGOUT("退出成功"),
     ;
 

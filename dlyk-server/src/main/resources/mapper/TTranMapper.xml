@@ -280,6 +280,11 @@
   </select>
   
   <!-- 查询交易详情 -->
+  <!-- 列表分页用的单表计数：避免 PageHelper 对联查 SQL 做 count -->
+  <select id="countAll" resultType="long">
+    select count(0) from t_tran
+  </select>
+
   <select id="selectTranDetailById" parameterType="java.lang.Integer" resultMap="TranDetailResultMap">
     SELECT 
         tt.id,

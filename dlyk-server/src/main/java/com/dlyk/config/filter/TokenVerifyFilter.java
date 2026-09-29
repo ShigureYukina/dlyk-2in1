@@ -35,6 +35,25 @@ public class TokenVerifyFilter extends OncePerRequestFilter {
     @Resource
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
+    /**
+     * 无需 JWT 鉴权的路径前缀。
+     *
+     * <p>Prometheus 抓取 /actuator/prometheus 时无法携带业务 JWT，
+     * 若不放行会被本过滤器直接以 901 拒绝，导致监控指标全空。
+     */
+    private static final String[] AUTH_WHITELIST_PREFIXES = {"/actuator"};
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        for (String prefix : AUTH_WHITELIST_PREFIXES) {
+            if (uri.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
