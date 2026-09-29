@@ -1,39 +1,24 @@
 package com.dlyk.config;
 
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
+/**
+ * 缓存刷新辅助配置
+ *
+ * <p>原 {@code @Scheduled} 定时刷新已迁移到 XXL-Job 的
+ * {@code cacheRefreshJobHandler}，本类只保留事务后清缓存等辅助能力。
+ */
 @Configuration
-@EnableScheduling
 public class CacheRefreshConfig {
 
     private final CacheManager cacheManager;
 
     public CacheRefreshConfig(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-    }
-
-    /**
-     * 定时刷新所有缓存，确保数据一致性
-     * 每30分钟执行一次
-     */
-    @Scheduled(fixedRate = 30 * 60 * 1000) // 30分钟
-    @Caching(evict = {
-            @CacheEvict(value = "activityCache", allEntries = true),
-            @CacheEvict(value = "ongoingActivityCache", allEntries = true),
-            @CacheEvict(value = "userCache", allEntries = true)
-    })
-    public void refreshAllCaches() {
-        // 这个方法的主要目的是通过@CacheEvict注解清除缓存
-        // 实际的缓存将在下次访问时重新加载
     }
 
     /**

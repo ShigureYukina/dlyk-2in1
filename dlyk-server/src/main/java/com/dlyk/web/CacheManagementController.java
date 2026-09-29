@@ -2,6 +2,7 @@ package com.dlyk.web;
 
 import com.dlyk.cache.CacheLockManager;
 import com.dlyk.cache.CacheWarmupService;
+import com.dlyk.cache.ListTotalCache;
 import com.dlyk.cache.TwoLevelCacheManager;
 import com.dlyk.result.R;
 import jakarta.annotation.Resource;
@@ -32,6 +33,9 @@ public class CacheManagementController {
     
     @Resource
     private CacheLockManager cacheLockManager;
+
+    @Resource
+    private ListTotalCache listTotalCache;
     
     /**
      * 清除指定缓存
@@ -73,7 +77,10 @@ public class CacheManagementController {
     
     /**
      * 清空指定缓存空间
-     * 
+     *
+     * <p>{@link ListTotalCache} 的数据是裸 Redis key、不在 CacheManager 里，
+     * 因此按名字特判一次，保证"清空缓存"这个语义对它是完整的。
+     *
      * @param cacheName 缓存名称
      * @return 操作结果
      */
@@ -81,6 +88,10 @@ public class CacheManagementController {
     public R clearCache(@RequestParam String cacheName) {
         try {
             cacheManager.clear(cacheName);
+            if (ListTotalCache.CACHE_NAME.equals(cacheName)) {
+                long removed = listTotalCache.clear();
+                log.info("列表 total 缓存已清空，删除 key 数: {}", removed);
+            }
             log.info("缓存空间已清空，cacheName: {}", cacheName);
             return R.OK("缓存空间清空成功");
         } catch (Exception e) {
@@ -116,8 +127,8 @@ public class CacheManagementController {
         try {
             Map<String, Object> stats = new HashMap<>();
             
-            // 锁管理器统计
-            stats.put("lockMapSize", cacheLockManager.getLockMapSize());
+            // 锁管理器统计（本实例持有中的分布式锁数量）
+            stats.put("heldLockCount", cacheLockManager.getLockMapSize());
             
             // 可以添加更多统计信息
             stats.put("timestamp", System.currentTimeMillis());
@@ -139,8 +150,8 @@ public class CacheManagementController {
     public R clearUnusedLocks() {
         try {
             cacheLockManager.clearUnusedLocks();
-            log.info("未使用的锁已清理");
-            return R.OK("锁清理成功");
+            log.info("本实例持锁统计已重置");
+            return R.OK("持锁统计重置成功");
         } catch (Exception e) {
             log.error("锁清理失败", e);
             return R.FAIL("锁清理失败: " + e.getMessage());
