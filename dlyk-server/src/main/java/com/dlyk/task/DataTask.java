@@ -9,18 +9,21 @@ import com.dlyk.result.DicEnum;
 import com.dlyk.service.ActivityService;
 import com.dlyk.service.DicTypeService;
 import com.dlyk.service.ProductService;
+import com.xxl.job.core.context.XxlJobHelper;
+import com.xxl.job.core.handler.annotation.XxlJob;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 
 @Component
-@EnableScheduling
 public class DataTask {
+
+    private static final Logger log = LoggerFactory.getLogger(DataTask.class);
 
     @Resource
     private DicTypeService dicTypeService;
@@ -29,19 +32,37 @@ public class DataTask {
     @Resource
     private ActivityService activityservice;
 
+    /**
+     * 应用启动时预热一次本地缓存，避免首个请求穿透到数据库。
+     * 这是启动动作而非定时任务，因此保留 @PostConstruct。
+     */
     @PostConstruct
     public void init() {
-        System.out.println("应用启动，执行缓存初始化...");
+        log.info("应用启动，执行缓存预热...");
         loadDataToCache();
     }
 
-    @Scheduled(cron = "${project.task.cron}")
-    public void Task() {
-        loadDataToCache();
+    /**
+     * 字典 / 产品 / 进行中活动的周期性缓存预热。
+     *
+     * <p>原 {@code @Scheduled(cron = "${project.task.cron}")} 已迁移至 XXL-Job 调度中心：
+     * 调度周期、失败重试次数、执行日志与告警策略统一在平台侧配置，
+     * 应用不再各自维护 cron 表达式。
+     */
+    @XxlJob("cacheWarmupJobHandler")
+    public void warmupCache() {
+        try {
+            loadDataToCache();
+            XxlJobHelper.log("缓存预热完成");
+        } catch (Exception e) {
+            log.error("缓存预热失败", e);
+            XxlJobHelper.log("缓存预热失败: {}", e.getMessage());
+            XxlJobHelper.handleFail("缓存预热失败: " + e.getMessage());
+        }
     }
 
     private void loadDataToCache() {
-        System.out.println("这里面就写具体要执行的业务逻辑代码......" + new Date());
+        log.info("开始执行缓存预热任务, 时间: {}", new Date());
         List<TDicType> dicTypeList = dicTypeService.loadAllDicType();
 
         dicTypeList.forEach(tDicType -> {

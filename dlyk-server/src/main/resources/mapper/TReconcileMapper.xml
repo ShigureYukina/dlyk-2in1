@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dlyk.mapper.TReconcileMapper">
+
+    <resultMap id="BaseResultMap" type="com.dlyk.model.TReconcileRecord">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="biz_type" jdbcType="VARCHAR" property="bizType"/>
+        <result column="biz_key" jdbcType="VARCHAR" property="bizKey"/>
+        <result column="detail" jdbcType="VARCHAR" property="detail"/>
+        <result column="shard_index" jdbcType="INTEGER" property="shardIndex"/>
+        <result column="shard_total" jdbcType="INTEGER" property="shardTotal"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <!-- 1) 线索已标记为已转换(state = -1)，但找不到对应的有效客户 —— 转换过程丢失 -->
+    <select id="selectConvertMissingClueIds" resultType="java.lang.Integer">
+        SELECT c.id
+        FROM t_clue c
+        LEFT JOIN t_customer cu
+               ON cu.clue_id = c.id
+              AND IFNULL(cu.deleted, 0) = 0
+        WHERE c.state = -1
+          AND IFNULL(c.deleted, 0) = 0
+          AND cu.id IS NULL
+          AND MOD(c.id, #{shardTotal}) = #{shardIndex}
+    </select>
+
+    <!-- 2) 同一条线索对应多条有效客户 —— 并发转换造成的重复写入 -->
+    <select id="selectDuplicateCustomerClueIds" resultType="java.lang.Integer">
+        SELECT cu.clue_id
+        FROM t_customer cu
+        WHERE IFNULL(cu.deleted, 0) = 0
+          AND cu.clue_id IS NOT NULL
+          AND MOD(cu.clue_id, #{shardTotal}) = #{shardIndex}
+        GROUP BY cu.clue_id
+        HAVING COUNT(*) > 1
+    </select>
+
+    <!-- 3) 线索已逻辑删除，但客户仍然有效 —— 删除未级联 -->
+    <select id="selectOrphanCustomerIds" resultType="java.lang.Integer">
+        SELECT cu.id
+        FROM t_customer cu
+        JOIN t_clue c ON c.id = cu.clue_id
+        WHERE IFNULL(cu.deleted, 0) = 0
+          AND IFNULL(c.deleted, 0) = 1
+          AND MOD(cu.id, #{shardTotal}) = #{shardIndex}
+    </select>
+
+    <!-- 事件驱动的增量校验：校验范围限定在指定线索，避免每次转化都全表扫描 -->
+    <select id="selectConvertMissingClueIdsByIds" resultType="java.lang.Integer">
+        SELECT c.id
+        FROM t_clue c
+        LEFT JOIN t_customer cu
+               ON cu.clue_id = c.id
+              AND IFNULL(cu.deleted, 0) = 0
+        WHERE c.state = -1
+          AND IFNULL(c.deleted, 0) = 0
+          AND cu.id IS NULL
+          AND c.id IN
+        <foreach collection="clueIds" item="clueId" open="(" separator="," close=")">
+            #{clueId}
+        </foreach>
+    </select>
+
+    <select id="selectDuplicateCustomerClueIdsByIds" resultType="java.lang.Integer">
+        SELECT cu.clue_id
+        FROM t_customer cu
+        WHERE IFNULL(cu.deleted, 0) = 0
+          AND cu.clue_id IN
+        <foreach collection="clueIds" item="clueId" open="(" separator="," close=")">
+            #{clueId}
+        </foreach>
+        GROUP BY cu.clue_id
+        HAVING COUNT(*) > 1
+    </select>
+
+    <insert id="insertBatch">
+        INSERT INTO t_reconcile_record (biz_type, biz_key, detail, shard_index, shard_total, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.bizType}, #{item.bizKey}, #{item.detail}, #{item.shardIndex}, #{item.shardTotal}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <delete id="deleteBefore">
+        DELETE FROM t_reconcile_record WHERE create_time &lt; #{time}
+    </delete>
+
+    <select id="countByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM t_reconcile_record WHERE biz_type = #{bizType}
+    </select>
+</mapper>
