@@ -5,8 +5,10 @@ import com.dlyk.mapper.TClueMapper;
 import com.dlyk.mapper.TCustomerMapper;
 import com.dlyk.model.TClue;
 import com.dlyk.model.TCustomer;
+import com.dlyk.model.TUser;
 import com.dlyk.query.CustomerQuery;
 import com.dlyk.util.JWTUtils;
+import com.dlyk.util.JSONUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +43,13 @@ class CustomerManagerTest {
     void setUp() {
         customerQuery = new CustomerQuery();
         customerQuery.setClueId(1);
-        customerQuery.setToken("mock.jwt.token");
+        // 用真实签发的 JWT，而不是随便一个字符串。
+        // 假 token 会在 JWTUtils.parseUserFromJWT 处直接抛解析异常，
+        // 使后面的 Mapper 桩函数永远执行不到，触发 Mockito 严格模式的
+        // UnnecessaryStubbingException —— 测试看起来"过了"，其实什么都没验证到。
+        TUser loginUser = new TUser();
+        loginUser.setId(1001);
+        customerQuery.setToken(JWTUtils.createJWT(JSONUtils.toJSON(loginUser)));
         customerQuery.setDescription("测试客户转换");
 
         mockClue = new TClue();
@@ -58,23 +66,16 @@ class CustomerManagerTest {
         when(tCustomerMapper.insertSelective(any(TCustomer.class))).thenReturn(1);
         when(tClueMapper.updateByPrimaryKeySelective(any(TClue.class))).thenReturn(1);
 
-        // 模拟JWT解析（实际测试中需要有效的JWT工具类）
-        try {
-            // 执行测试
-            Boolean result = customerManager.convertCustomer(customerQuery);
+        // 执行测试
+        Boolean result = customerManager.convertCustomer(customerQuery);
 
-            // 验证结果
-            assertTrue(result, "线索转换为客户应该成功");
+        // 验证结果
+        assertTrue(result, "线索转换为客户应该成功");
 
-            // 验证方法调用
-            verify(tClueMapper, times(1)).selectByPrimaryKey(1);
-            verify(tCustomerMapper, times(1)).insertSelective(any(TCustomer.class));
-            verify(tClueMapper, times(1)).updateByPrimaryKeySelective(any(TClue.class));
-
-        } catch (Exception e) {
-            // JWT解析可能失败，这是预期的，因为我们使用的是mock token
-            assertTrue(e.getMessage().contains("JWT") || e instanceof RuntimeException);
-        }
+        // 验证方法调用
+        verify(tClueMapper, times(1)).selectByPrimaryKey(1);
+        verify(tCustomerMapper, times(1)).insertSelective(any(TCustomer.class));
+        verify(tClueMapper, times(1)).updateByPrimaryKeySelective(any(TClue.class));
     }
 
     @Test
@@ -115,16 +116,10 @@ class CustomerManagerTest {
         when(tCustomerMapper.insertSelective(any(TCustomer.class))).thenReturn(0); // 插入失败
         when(tClueMapper.updateByPrimaryKeySelective(any(TClue.class))).thenReturn(1);
 
-        try {
-            // 执行测试
-            Boolean result = customerManager.convertCustomer(customerQuery);
+        // 执行测试
+        Boolean result = customerManager.convertCustomer(customerQuery);
 
-            // 验证结果 - 应该返回false，因为插入失败
-            assertFalse(result, "当数据库插入失败时，转换应该失败");
-
-        } catch (Exception e) {
-            // JWT解析可能失败，这也是可以接受的
-            assertTrue(e.getMessage().contains("JWT") || e instanceof RuntimeException);
-        }
+        // 验证结果 - 应该返回false，因为插入失败
+        assertFalse(result, "当数据库插入失败时，转换应该失败");
     }
 }
