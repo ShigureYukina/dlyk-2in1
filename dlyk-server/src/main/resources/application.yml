@@ -30,6 +30,20 @@ spring:
       port: 6379
       password:
 
+  # 配置 RabbitMQ 的连接信息
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    listener:
+      simple:
+        # 消费失败自动重试，配合对账兜底避免消息处理异常直接丢数据
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000
+
   #设置jackson返回json数据时，时区和格式
   jackson:
     time-zone: GMT+8
@@ -59,6 +73,56 @@ logging:
     console: UTF-8
     file: UTF-8
 
-project:
-  task:
-    cron: '0 */5 * * * *'
+# ==================== 分布式任务调度（XXL-Job） ====================
+# 原 Spring @Scheduled 定时任务已迁移至调度中心统一管理，
+# 调度周期 / 失败重试 / 分片广播 / 执行日志 / 告警策略均在调度中心配置。
+xxl:
+  job:
+    # 置为 false 可关闭执行器注册（本地不连调度中心时使用）
+    enabled: ${XXL_JOB_ENABLED:true}
+    admin:
+      addresses: ${XXL_JOB_ADMIN_ADDRESSES:http://127.0.0.1:8080/xxl-job-admin}
+    accessToken: ${XXL_JOB_ACCESS_TOKEN:default_token}
+    executor:
+      appname: ${XXL_JOB_EXECUTOR_APPNAME:dlyk-server-executor}
+      # 应用跑在宿主机、调度中心跑在容器时，需显式指定 address，
+      # 否则执行器上报的是宿主机内网 IP，容器内的调度中心回调不到。
+      address: ${XXL_JOB_EXECUTOR_ADDRESS:}
+      ip: ${XXL_JOB_EXECUTOR_IP:}
+      port: ${XXL_JOB_EXECUTOR_PORT:9999}
+      logpath: ./logs/xxl-job
+      logretentiondays: 7
+
+# ==================== 高并发治理参数 ====================
+dlyk:
+  redisson:
+    # Redisson 连接池大小，需覆盖并发抢锁的线程数
+    pool-size: ${DLYK_REDISSON_POOL_SIZE:32}
+    timeout-ms: ${DLYK_REDISSON_TIMEOUT_MS:3000}
+
+  # 事件异步化开关：置为 false 时既不发布也不消费，
+  # 用于本地只调接口、没起 RabbitMQ 的场景
+  mq:
+    enabled: ${DLYK_MQ_ENABLED:true}
+
+  # 列表 total 缓存的旁路开关（见 com.dlyk.cache.ListTotalCache）。
+  # 置为 false 时这层缓存整体不生效，用于压测时构造"没有它"的对照组；
+  # 线上若出现总数长时间不准，也可以先把这个开关关掉止损。
+  list-total-cache:
+    enabled: ${LIST_TOTAL_CACHE_ENABLED:true}
+
+# ==================== 可观测性 ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name:dlyk-server}
+    # 缓存命中率等指标需要开启统计
+    enable:
+      cache: true
