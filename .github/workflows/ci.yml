@@ -56,6 +56,8 @@ jobs:
         env:
           # 连的是 service 容器，密码用 CI 专用值，覆盖 application.yml 里的本地配置
           SPRING_DATASOURCE_PASSWORD: root
+          # JWT 密钥已外部化，仓库内无默认值，CI 用专用测试值
+          JWT_SECRET: ci-only-test-secret-do-not-use-in-any-real-env
           # 关掉调度中心与 MQ：测试不依赖它们，开着只会让启动期反复重连
           XXL_JOB_ENABLED: "false"
           DLYK_MQ_ENABLED: "false"

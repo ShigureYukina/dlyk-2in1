@@ -18,7 +18,24 @@ import java.util.Map;
  */
 public class JWTUtils {
 
-    public static final String SECRET = "dY8300olWQ3345;1d<3w48";
+    /**
+     * HMAC 签名密钥：只从环境变量 / JVM 参数读取，仓库内不落任何默认值。
+     * 历史提交中曾出现过硬编码密钥（已作废），因此这里在缺失时直接快速失败，
+     * 避免应用带着可预测的密钥启动。
+     */
+    private static final String SECRET = resolveSecret();
+
+    private static String resolveSecret() {
+        String secret = System.getenv("JWT_SECRET");
+        if (secret == null || secret.isBlank()) {
+            secret = System.getProperty("jwt.secret");
+        }
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "缺少 JWT 签名密钥：请设置环境变量 JWT_SECRET（或 JVM 参数 -Djwt.secret=...）后启动");
+        }
+        return secret;
+    }
 
     /**
      * 生成JWT （token）

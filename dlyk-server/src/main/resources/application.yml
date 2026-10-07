@@ -9,7 +9,8 @@ spring:
     url: jdbc:mysql://localhost:3306/dlyk?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: 1056398086
+    # 密钥一律走环境变量，仓库内不落默认值（历史提交中的旧密码已作废）
+    password: ${MYSQL_PASSWORD:}
     hikari:
       #最大连接数，默认是10
       maximum-pool-size: 30
@@ -112,7 +113,11 @@ dlyk:
     enabled: ${LIST_TOTAL_CACHE_ENABLED:true}
 
 # ==================== 可观测性 ====================
+# 管理面独立端口：actuator 只在 9090 暴露，业务端口 8089 不再有任何管理端点，
+# Prometheus 抓取配置见 deploy/prometheus/prometheus.yml
 management:
+  server:
+    port: 9090
   endpoints:
     web:
       exposure:
