@@ -316,6 +316,26 @@ INSERT INTO `t_customer` (`id`, `clue_id`, `product`, `description`, `next_conta
 INSERT INTO `t_customer` (`id`, `clue_id`, `product`, `description`, `next_contact_time`, `create_time`, `create_by`, `edit_time`, `edit_by`) VALUES (11, 13, 2, '沃尔沃二', '2023-05-13 00:00:00', '2023-05-04 10:04:03', 1, NULL, NULL);
 
 -- ----------------------------
+-- 治理线：清洗种子重复客户 + 条件唯一索引兜底
+-- 与 tools/db/02_normalize_and_index.sql 第 2/3 步同口径：
+-- 分布式锁只防"新增重复"，历史重复必须清洗后才能加唯一索引；
+-- 函数索引仅对 deleted=0 的记录强制 clue_id 唯一，软删后允许再次转换
+-- ----------------------------
+UPDATE t_customer c
+JOIN (
+    SELECT clue_id, MIN(id) AS keep_id
+    FROM t_customer
+    WHERE deleted = 0 AND clue_id IS NOT NULL
+    GROUP BY clue_id
+    HAVING COUNT(*) > 1
+) d ON c.clue_id = d.clue_id
+SET c.deleted = 1
+WHERE c.deleted = 0 AND c.id <> d.keep_id;
+
+ALTER TABLE t_customer
+    ADD UNIQUE INDEX uk_customer_clue_active ((IF(deleted = 0, clue_id, NULL)));
+
+-- ----------------------------
 -- Table structure for t_customer_remark
 -- ----------------------------
 DROP TABLE IF EXISTS `t_customer_remark`;
@@ -913,5 +933,23 @@ INSERT INTO `t_user_role` VALUES (3, 3, 2);
 INSERT INTO `t_user_role` VALUES (4, 4, 3);
 INSERT INTO `t_user_role` VALUES (5, 5, 4);
 INSERT INTO `t_user_role` VALUES (6, 6, 5);
+
+-- ----------------------------
+-- Table structure for t_reconcile_record（对账记录表）
+-- 承载定时对账任务发现的脏数据，供人工复核；完整 DDL 与
+-- dlyk-server/src/main/resources/sql/upgrade/01_add_reconcile_table.sql 保持一致
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `t_reconcile_record` (
+  `id`          int          NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `biz_type`    varchar(32)  NOT NULL COMMENT '对账类型：CLUE_CONVERT_MISSING / DUPLICATE_CUSTOMER / ORPHAN_CUSTOMER',
+  `biz_key`     varchar(64)  NOT NULL COMMENT '业务键，如 clueId / customerId',
+  `detail`      varchar(512) NULL DEFAULT NULL COMMENT '差异详情',
+  `shard_index` int          NULL DEFAULT NULL COMMENT '执行分片序号',
+  `shard_total` int          NULL DEFAULT NULL COMMENT '分片总数',
+  `create_time` datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '发现时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_biz_type_time`(`biz_type` ASC, `create_time` ASC) USING BTREE,
+  INDEX `idx_biz_key`(`biz_key` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '数据一致性对账记录表';
 
 SET FOREIGN_KEY_CHECKS = 1;

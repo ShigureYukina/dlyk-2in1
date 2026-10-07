@@ -44,9 +44,11 @@ WHERE c.deleted = 0 AND c.id <> d.keep_id;
 --    应用层的分布式锁可能因超时/人工改库而失效，唯一索引是最后一道防线。
 --    这里使用函数索引：仅对"未删除"的客户强制 clue_id 唯一，
 --    已逻辑删除的记录不参与唯一性判断（否则软删后无法再次转换同一线索）。
+--
+--    ※ 该唯一索引与第 2 步的重复清洗已内置到 dlyk.sql（2026-10 起），
+--      新环境导入建库脚本即带；本脚本不再重复执行 ALTER
+--      （MySQL 无 ADD INDEX IF NOT EXISTS，重复执行会报 Duplicate key name）。
 -- ------------------------------------------------------------
-ALTER TABLE t_customer
-    ADD UNIQUE INDEX uk_customer_clue_active ((IF(deleted = 0, clue_id, NULL)));
 
 -- ------------------------------------------------------------
 -- 4) 列表与校验类查询索引
