@@ -1,0 +1,57 @@
+# ShardingSphere-JDBC 驱动模式配置模板（本文件是模板，不直接生效）。
+#
+# 生效流程：复制为同目录 sharding.yaml（已 gitignore），替换 ${TOKEN} 后以 sharding
+# profile 启动；application-sharding.yml 用 absolutepath 指向它。一键生成：
+#   bash tools/app/gen-sharding-config.sh
+#
+# 注意：ShardingSphere 驱动模式不会替换 YAML 里的环境变量占位符（与 Server 模式不同），
+# 所以连接信息必须在"生成"这一步写入文件，而不是指望运行期替换。
+#
+# 分表方案：t_clue_remark（跟进记录，全库水位最高的流水表）按 clue_id MOD 4 分成 4 张物理表。
+# - 只分表不分库：单实例 MySQL 尚无容量/连接数瓶颈，先把"路由与合并"的机制演练到位，
+#   分库只改变数据源拓扑，配置结构不变。
+# - 主键不用 ShardingSphere 雪花：实体 id 是 Integer（int 列），雪花是 64 位会溢出，
+#   且前端 JS Number 只有 2^53 安全整数。改用"分段 AUTO_INCREMENT"——4 张物理表各自
+#   自增、起点错开 5 亿（见 tools/db/03_sharding_setup.sql），保持 int 兼容且零代码改动。
+# - 插入/列表查询都带 clue_id（等值分片键，单片命中）；selectByPrimaryKey 等不带分片键的
+#   语句会广播到 4 张物理表再归并，正确性由全局唯一 id 保证。
+mode:
+  type: Standalone
+  repository:
+    type: Memory
+
+databaseName: dlyk_sharding
+
+dataSources:
+  dlyk_ds:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    # 驱动模式的 dataSources 条目是扁平 Map：dataSourceClassName 与池参数同级，
+    # 不嵌套 props（嵌套会让 StorageUnit 读不到 url/username 而在初始化期 NPE）
+    url: jdbc:mysql://${SHARDING_DB_HOST:127.0.0.1}:${SHARDING_DB_PORT:3306}/dlyk?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: ${SHARDING_DB_USERNAME:root}
+    password: "${SHARDING_DB_PASSWORD:}"
+    maximumPoolSize: 10
+    minimumIdle: 2
+
+rules:
+  # 单表（未分片的 17 张表）显式全量加载：默认懒加载在"分片表 JOIN 单表"的场景
+  # 会报 Table or view does not exist
+  - !SINGLE
+    tables:
+      - "*.*.*"
+  - !SHARDING
+    tables:
+      t_clue_remark:
+        actualDataNodes: dlyk_ds.t_clue_remark_${0..3}
+        tableStrategy:
+          standard:
+            shardingColumn: clue_id
+            # standard 策略不能用 MOD/HASH_MOD 这类 auto 算法，用 INLINE 表达式取模
+            shardingAlgorithmName: t-clue-remark-inline
+    shardingAlgorithms:
+      t-clue-remark-inline:
+        type: INLINE
+        props:
+          algorithm-expression: t_clue_remark_${clue_id % 4}
+          # 不带分片键的查询（如按主键广播）依赖这个开关，否则直接路由失败
+          allow-range-query-with-inline-sharding: true

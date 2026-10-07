@@ -34,6 +34,15 @@ public class RabbitMqConfig {
     /** 客户转化事件路由键 */
     public static final String CUSTOMER_CONVERTED_ROUTING_KEY = "customer.converted";
 
+    /** ES 同步队列：所有线索变更事件都进这一条队列，动作由路由键区分 */
+    public static final String ES_SYNC_QUEUE = "dlyk.es.sync.queue";
+
+    /** 线索新增/编辑路由键 */
+    public static final String CLUE_CHANGED_ROUTING_KEY = "clue.changed";
+
+    /** 线索逻辑删除路由键 */
+    public static final String CLUE_DELETED_ROUTING_KEY = "clue.deleted";
+
     @Bean
     public TopicExchange crmTopicExchange() {
         return new TopicExchange(CRM_TOPIC_EXCHANGE, true, false);
@@ -49,6 +58,25 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(customerConvertedQueue)
                 .to(crmTopicExchange)
                 .with(CUSTOMER_CONVERTED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue esSyncQueue() {
+        return QueueBuilder.durable(ES_SYNC_QUEUE).build();
+    }
+
+    @Bean
+    public Binding clueChangedBinding(Queue esSyncQueue, TopicExchange crmTopicExchange) {
+        return BindingBuilder.bind(esSyncQueue)
+                .to(crmTopicExchange)
+                .with(CLUE_CHANGED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding clueDeletedBinding(Queue esSyncQueue, TopicExchange crmTopicExchange) {
+        return BindingBuilder.bind(esSyncQueue)
+                .to(crmTopicExchange)
+                .with(CLUE_DELETED_ROUTING_KEY);
     }
 
     /**

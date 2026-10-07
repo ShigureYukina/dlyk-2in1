@@ -1,0 +1,9 @@
+{
+  "properties": {
+    "id": { "type": "long" },
+    "fullName": { "type": "text", "analyzer": "dlyk_ngram" },
+    "phone": { "type": "keyword" },
+    "ownerName": { "type": "keyword" },
+    "deleted": { "type": "integer" }
+  }
+}

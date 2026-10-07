@@ -8,14 +8,18 @@ import com.dlyk.exception.DuplicateRequestException;
 import com.dlyk.constant.Constants;
 import com.dlyk.mapper.TClueMapper;
 import com.dlyk.model.TClue;
+import com.dlyk.mq.ClueChangedEventPublisher;
 import com.dlyk.query.BaseQuery;
 import com.dlyk.query.ClueQuery;
+import com.dlyk.search.ClueSearchService;
 import com.dlyk.service.ClueService;
 import com.dlyk.util.JWTUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +34,8 @@ import java.util.List;
 @Service
 public class ClueServiceImpl implements ClueService {
 
+    private static final Logger log = LoggerFactory.getLogger(ClueServiceImpl.class);
+
     @Resource
     private TClueMapper tClueMapper;
 
@@ -38,6 +44,12 @@ public class ClueServiceImpl implements ClueService {
 
     @Resource
     private ListTotalCache listTotalCache;
+
+    @Resource
+    private ClueSearchService clueSearchService;
+
+    @Resource
+    private ClueChangedEventPublisher clueChangedEventPublisher;
 
     /**
      * 线索列表分页。
@@ -49,9 +61,20 @@ public class ClueServiceImpl implements ClueService {
      * <p>单表统计仍然是每翻一页一次 COUNT，翻页越频繁、打的库越多。
      * 由于 total 只随线索新增/逻辑删除变化、与筛选条件无关，这里再用
      * {@link ListTotalCache} 加一层 10 秒 TTL 缓存把它挡掉。
+     *
+     * <p>带关键字时走 ES 检索（dlyk.es.enabled=true 才启用）：ES 负责命中与排序，
+     * 详情按 id 回 MySQL 拼装。ES 查询失败时回落无关键字的 MySQL 列表 ——
+     * 搜索是增强不是依赖，但回落必须留痕（warn 日志），不能静默装作没搜过。
      */
     @Override
-    public PageInfo<TClue> getCluePage(Integer current) {
+    public PageInfo<TClue> getCluePage(Integer current, String name, String phone) {
+        if (clueSearchService.shouldSearch(name, phone)) {
+            try {
+                return clueSearchService.search(current, name, phone);
+            } catch (Exception ex) {
+                log.warn("ES 检索失败，本次请求回落 MySQL 列表路径（忽略关键字）。current={}", current, ex);
+            }
+        }
         long total = listTotalCache.get("t_clue", tClueMapper::countAlive);
         // count=false：跳过 PageHelper 基于联查生成的低效 COUNT
         PageHelper.startPage(current, Constants.PAGE_SIZE, false);
@@ -114,7 +137,11 @@ public class ClueServiceImpl implements ClueService {
             tClue.setCreateBy(loginUserId);
             tClue.setCreateTime(new Date());
 
-            return tClueMapper.insertSelective(tClue);
+            int rows = tClueMapper.insertSelective(tClue);
+            if (rows > 0) {
+                clueChangedEventPublisher.publishChanged(tClue.getId());
+            }
+            return rows;
         } finally {
             cacheLockManager.unlock(lockKey);
         }
@@ -137,25 +164,37 @@ public class ClueServiceImpl implements ClueService {
         Integer userId = JWTUtils.parseUserFromJWT(cluequery.getToken()).getId();
         tClue.setEditBy(userId);//设置编辑人
 
-        return tClueMapper.updateByPrimaryKeySelective(tClue);
+        int rows = tClueMapper.updateByPrimaryKeySelective(tClue);
+        if (rows > 0) {
+            clueChangedEventPublisher.publishChanged(tClue.getId());
+        }
+        return rows;
     }
-    
+
     @Override
     public int deleteClue(Integer id) {
         // 逻辑删除，将deleted字段设置为1
         TClue tClue = new TClue();
         tClue.setId(id);
         tClue.setDeleted(1);
-        return tClueMapper.updateByPrimaryKeySelective(tClue);
+        int rows = tClueMapper.updateByPrimaryKeySelective(tClue);
+        if (rows > 0) {
+            clueChangedEventPublisher.publishDeleted(id);
+        }
+        return rows;
     }
-    
+
     @Override
     public int batchDeleteClue(List<Integer> idList) {
         if (idList == null || idList.isEmpty()) {
             return 0;
         }
         // 批量逻辑删除
-        return tClueMapper.batchDeleteByIds(idList);
+        int rows = tClueMapper.batchDeleteByIds(idList);
+        if (rows > 0) {
+            idList.forEach(clueChangedEventPublisher::publishDeleted);
+        }
+        return rows;
     }
     
     @Override

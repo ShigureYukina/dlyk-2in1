@@ -42,6 +42,92 @@
         </dependency>
 
         <!--
+          Elasticsearch 检索：Boot 托管 8.11.x 客户端，自动装配 co.elastic.clients 的
+          ElasticsearchClient（连接地址见 spring.elasticsearch.uris）。
+          索引/查询不经过 Spring Data 仓库，直接用官方 client 写 DSL，
+          分析器与映射定义见 resources/elasticsearch/。
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+
+        <!--
+          ShardingSphere-JDBC（分表，仅 sharding profile 生效，见 application-sharding.yml）。
+          5.3+ 移除了 spring-boot-starter，走 JDBC 驱动模式：
+          spring.datasource.url=jdbc:shardingsphere:classpath:sharding.yaml，
+          与 MyBatis/PageHelper 无冲突（SS 自带 SQL 解析器，不依赖 jsqlparser）。
+          用 5.5.3：5.5.0 的 pom 依赖了未发布到中央仓库的 shardingsphere-test-util（官方打包事故）。
+        -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-jdbc</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- SS 5.5.3 依赖 commons-lang3 3.18+ 的 Strings API（NoClassDefFoundError: Strings），
+             必须显式钉版本压过 Boot 3.2 托管的 3.13 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.18.0</version>
+        </dependency>
+        <!-- 5.5.x 把配置 URL 加载器拆成了独立模块：classpath: / absolutepath: 前缀各需一个 -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-infra-url-classpath</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-infra-url-absolutepath</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- actualDataNodes 里 ${0..3} 这类内联表达式由 Groovy 引擎展开（5.5 默认引擎） -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-infra-expr-groovy</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- 5.5.x 的 shardingsphere-jdbc 聚合包不再自带功能规则：
+             缺了它，YAML 里的 !SHARDING 标签无法解析（Invalid tag） -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-sharding-core</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- Hikari 池元数据 SPI（url↔jdbcUrl 同义词表在这里）：
+             缺了它数据源 props 全部识别失败，启动期在 StorageUnit 直接 NPE -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-infra-data-source-pool-hikari</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- Standalone 模式构建器与其元数据仓库（5.5.x 聚合包只带 cluster-mode）。
+             元数据仓库用 memory：单机演练不需要持久化模式元数据 -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-standalone-mode-core</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-standalone-mode-repository-memory</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- 权限提供者 SPI 的默认实现（ALL_PERMITTED）在这里，聚合包不带 -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-authority-simple</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+        <!-- MySQL 方言 SQL 解析器（执行 SQL 时按 dialect 加载，聚合包不带） -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-parser-sql-engine-mysql</artifactId>
+            <version>5.5.3</version>
+        </dependency>
+
+        <!--
           MyBatis-Plus：在 MyBatis 之上提供通用 CRUD 与条件构造器。
           项目原有的 @Mapper 接口 + XML 映射全部继续可用（MP 兼容原生 MyBatis），
           只有需要通用 CRUD 的新 Mapper 才继承 BaseMapper。

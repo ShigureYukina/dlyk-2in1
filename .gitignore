@@ -379,3 +379,6 @@ tools/jmeter/result*.jtl
 tools/jmeter/report/
 tools/jmeter/jmeter.log
 tools/load/__pycache__/
+
+# ShardingSphere 本地生成配置（含真实连接信息，从模板生成）
+dlyk-server/src/main/resources/sharding.yaml

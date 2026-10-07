@@ -34,6 +34,19 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=12
+      elasticsearch:
+        image: elasticsearch:8.11.4
+        ports:
+          - 9200:9200
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+        options: >-
+          --health-cmd="curl -fs http://localhost:9200/_cluster/health || exit 1"
+          --health-interval=15s
+          --health-timeout=10s
+          --health-retries=30
 
     steps:
       - name: Checkout
@@ -61,4 +74,7 @@ jobs:
           # 关掉调度中心与 MQ：测试不依赖它们，开着只会让启动期反复重连
           XXL_JOB_ENABLED: "false"
           DLYK_MQ_ENABLED: "false"
+          # 开启 ES 检索并放行真实 ES 集成测试（ClueEsSearchIntegrationTest 的门控变量）
+          DLYK_ES_ENABLED: "true"
+          DLYK_ES_IT: "true"
         run: mvn -B test

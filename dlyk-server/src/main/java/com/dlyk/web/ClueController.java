@@ -29,12 +29,18 @@ public class ClueController {
     private CustomerService customerService;
 
 //    @PreAuthorize(value="hasAnyAuthority('clue:list')")
+    /**
+     * 线索列表分页。name/phone 是前端搜索框参数：dlyk.es.enabled=true 时走 ES 检索，
+     * 否则按原分页路径返回（历史上这两个参数一直被本方法丢弃，检索上线后真正生效）。
+     */
     @GetMapping(value = "/api/clues")
-    public R CluePage(@RequestParam(value = "current", required = false) Integer current) {
+    public R CluePage(@RequestParam(value = "current", required = false) Integer current,
+                      @RequestParam(value = "name", required = false) String name,
+                      @RequestParam(value = "phone", required = false) String phone) {
         if (current == null) {
             current = 1;
         }
-        PageInfo<TClue> pageInfo = clueService.getCluePage(current);
+        PageInfo<TClue> pageInfo = clueService.getCluePage(current, name, phone);
         return R.OK(pageInfo);
     }
 

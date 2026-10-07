@@ -13,13 +13,14 @@
 
 | 目录 | 内容 |
 | --- | --- |
-| `dlyk-server/` | 后端：Spring Boot + MyBatis（原生 XML）+ Redis/Redisson + RabbitMQ + XXL-Job，18 张表 / 19 个 Mapper |
+| `dlyk-server/` | 后端：Spring Boot + MyBatis（原生 XML）+ Redis/Redisson + RabbitMQ + XXL-Job + Elasticsearch 检索，18 张表 / 19 个 Mapper |
 | `dlyk-front/` | 前端：Vue 3 |
 | `docs/load/` | 压测记录：Locust / JMeter、干净 A/B 对照、口径说明 |
 | `docs/perf/` | 性能排查：慢 SQL 探针、索引实验、Redis 往返统计口径 |
+| `docs/es/` | 线索检索：MySQL 为主库 / ES 为检索副本的同步与兜底方案 |
 | `tools/` | Locust 场景脚本、JMeter 测试计划、DB 造数与探针脚本、重启脚本 |
 | `deploy/` | Nginx 反向代理（统一入口 / IP 限流 / gzip）与 Prometheus 配置 |
-| `docker-compose.yml` | 本地依赖栈：MySQL / Redis / RabbitMQ / Nginx / XXL-Job Admin |
+| `docker-compose.yml` | 本地依赖栈：MySQL / Redis / RabbitMQ / Elasticsearch / Nginx / XXL-Job Admin |
 
 ## 治理线速览（细节见 docs/）
 
@@ -30,6 +31,8 @@
 | 并发一致性 | Redisson 锁按线索串行化（锁在事务外）+ 条件唯一索引兜底 + 幂等切面 | 20 线程并发用例零重复 |
 | 调度迁移 | `@Scheduled` → XXL-Job 分片广播，失败重试 / 告警平台侧配置 | 消除多实例重复执行 |
 | 消息异步化 | 客户转换事件走 RabbitMQ（持久化 + 消费重试 + 开关回退），不阻塞主流程 | — |
+| 检索补齐 | 线索关键字检索接 ES（副本字段最小化，命中后回 MySQL 拼详情），事件增量同步 + reindex 全量兜底 + 查询异常回落 | —（功能上线，未纳入压测口径，见 `docs/es/README.md`） |
+| 分表演练 | 跟进记录表按 clue_id 分 4 片（ShardingSphere-JDBC 驱动模式），分段 AUTO_INCREMENT 保 int 兼容 | —（机制演练 + 容量预案，未纳入压测口径，见 `docs/sharding/README.md`） |
 | 全局效果 | 全部缓存开关开启，按业务请求归一化 | 每千业务请求 DB 查询 1,203 → 602（-50%） |
 
 > 口径四要素：同一份数据 / 同一台机器 / 同一轮 / 同一口径。测量方式与 baseline 逐项见
@@ -51,6 +54,8 @@ docker compose up -d        # 起依赖栈（MySQL/Redis/RabbitMQ/Nginx/XXL-Job 
 | `MYSQL_ROOT_PASSWORD` | 依赖栈 MySQL root 密码 | `.env`（compose 自动读取，缺失时 compose 直接报错） |
 | `MYSQL_PASSWORD` | 应用连接 MySQL 的密码 | 启动应用的环境（IDE 运行配置 / shell） |
 | `JWT_SECRET` | JWT 签名密钥，缺失时应用拒绝启动 | 同上 |
+| `DLYK_ES_ENABLED` | 线索 ES 检索开关（默认 false；开启后需 `docker compose up -d elasticsearch`） | 启动应用的环境 |
+| `ES_URIS` | Elasticsearch 连接地址（默认 `http://127.0.0.1:9200`） | 同上 |
 
 ```bash
 # 依赖栈密钥写进 .env（该文件已被 gitignore，不入库）：

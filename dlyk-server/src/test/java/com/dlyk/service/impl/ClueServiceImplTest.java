@@ -1,6 +1,8 @@
 package com.dlyk.service.impl;
 
 import com.dlyk.mapper.TClueMapper;
+import com.dlyk.mq.ClueChangedEventPublisher;
+import com.dlyk.search.ClueSearchService;
 import com.dlyk.service.ClueService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,12 @@ class ClueServiceImplTest {
 
     @Mock
     private TClueMapper tClueMapper;
+
+    @Mock
+    private ClueSearchService clueSearchService;
+
+    @Mock
+    private ClueChangedEventPublisher clueChangedEventPublisher;
 
     @InjectMocks
     private ClueServiceImpl clueService;

@@ -11,7 +11,13 @@ import java.util.List;
 /** copy by ShigureYukina,from 2025/8/24-下午2:27 */
 public interface ClueService {
 
-    PageInfo<TClue> getCluePage(Integer current);
+    /**
+     * 线索列表分页。
+     *
+     * <p>name/phone 为前端搜索框参数（历史上后端一直没接，ES 检索上线后生效）：
+     * dlyk.es.enabled 且带关键字时走 Elasticsearch 检索，否则走 MySQL 分页原路径。
+     */
+    PageInfo<TClue> getCluePage(Integer current, String name, String phone);
 
     /**
      * 游标分页查询线索（深分页优化）

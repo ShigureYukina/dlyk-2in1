@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    # ShardingSphere-JDBC 5.5+ 无 starter，走 JDBC 驱动模式。
+    # sharding.yaml（由模板生成的本地文件，gitignore）包含真实连接信息，
+    # 因此这里用 absolutepath 而不是 classpath：密码不该进 git。
+    # 生成方式见 tools/app/gen-sharding-config.sh
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:absolutepath:${DLYK_SHARDING_YAML:}
+    # HikariCP 依旧在外层池化（驱动内部还有一层真实 MySQL 连接池，
+    # 双层池化是驱动模式的已知取舍，外层池不必开大）
+    hikari:
+      maximum-pool-size: 20

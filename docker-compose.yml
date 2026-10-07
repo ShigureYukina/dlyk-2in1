@@ -74,6 +74,28 @@ services:
       retries: 10
       start_period: 30s
 
+  # Elasticsearch：线索关键字检索（dlyk.es.enabled=true 时使用）
+  # 单机开发配置：关安全认证、512m 堆；分析器与映射由应用启动时自动创建（见 com.dlyk.search）
+  elasticsearch:
+    image: ${IMAGE_PREFIX:-}elasticsearch:8.11.4
+    container_name: dlyk-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      TZ: Asia/Shanghai
+    volumes:
+      - dlyk-es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+
   # 反向代理：统一入口 + 限流 + 真实 IP 透传
   # 访问 http://localhost:8081/api/...
   nginx:
@@ -116,3 +138,5 @@ volumes:
     name: dlyk-rabbitmq-data
   dlyk-nginx-logs:
     name: dlyk-nginx-logs
+  dlyk-es-data:
+    name: dlyk-es-data

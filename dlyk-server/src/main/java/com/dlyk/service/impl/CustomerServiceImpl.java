@@ -4,6 +4,7 @@ import com.dlyk.cache.CacheLockManager;
 import com.dlyk.cache.ListTotalCache;
 import com.dlyk.constant.Constants;
 import com.dlyk.event.CustomerConvertedEvent;
+import com.dlyk.mq.ClueChangedEventPublisher;
 import com.dlyk.mq.CustomerConvertedEventPublisher;
 import com.dlyk.exception.DuplicateRequestException;
 import com.dlyk.manager.CustomerManager;
@@ -38,6 +39,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Resource
     private CustomerConvertedEventPublisher eventPublisher;
 
+    @Resource
+    private ClueChangedEventPublisher clueChangedEventPublisher;
+
     /**
      * 线索转客户。
      *
@@ -67,6 +71,8 @@ public class CustomerServiceImpl implements CustomerService {
             // 该方法返回即代表事务已提交，因此此处发布是安全的。
             if (Boolean.TRUE.equals(converted)) {
                 eventPublisher.publish(new CustomerConvertedEvent(clueId, new Date()));
+                // 转化会改写 t_clue.state，ES 检索副本也要跟着变（同样吞异常、不影响主链路）
+                clueChangedEventPublisher.publishChanged(clueId);
             }
             return converted;
         } finally {
