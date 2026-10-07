@@ -90,11 +90,4 @@ public class RedisCacheConfig {
         };
     }
     
-    /**
-     * 缓存刷新配置Bean
-     */
-    @Bean
-    public CacheRefreshConfig cacheRefreshConfig(CacheManager cacheManager) {
-        return new CacheRefreshConfig(cacheManager);
-    }
 }

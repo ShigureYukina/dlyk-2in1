@@ -1,6 +1,5 @@
 package com.dlyk.service.impl;
 
-import com.dlyk.config.CacheRefreshConfig;
 import com.dlyk.constant.Constants;
 import com.dlyk.mapper.TActivityMapper;
 import com.dlyk.model.TActivity;
@@ -24,9 +23,7 @@ import java.util.List;
 public class ActivityServiceImpl implements ActivityService {
     @Resource
     private TActivityMapper tActivityMapper;
-    
-    @Resource
-    private CacheRefreshConfig cacheRefreshConfig;
+
 
     @Override
     @Cacheable(value = "activityCache", keyGenerator = "cacheKeyGenerator", cacheManager = "redisCacheManager")
@@ -59,11 +56,6 @@ public class ActivityServiceImpl implements ActivityService {
 
         int result = tActivityMapper.insertSelective(tActivity);
         
-        // 确保事务提交后清除缓存
-        if (result > 0) {
-            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
-        }
-        
         return result;
     }
 
@@ -89,11 +81,6 @@ public class ActivityServiceImpl implements ActivityService {
 
         int result = tActivityMapper.updateByPrimaryKeySelective(tActivity);
         
-        // 确保事务提交后清除缓存
-        if (result > 0) {
-            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
-        }
-        
         return result;
     }
 
@@ -103,11 +90,6 @@ public class ActivityServiceImpl implements ActivityService {
     public int deleteActivity(Integer id) {
         int result = tActivityMapper.deleteByPrimaryKey(id);
         
-        // 确保事务提交后清除缓存
-        if (result > 0) {
-            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
-        }
-        
         return result;
     }
 
@@ -116,11 +98,6 @@ public class ActivityServiceImpl implements ActivityService {
     @CacheEvict(value = {"activityCache", "ongoingActivityCache"}, allEntries = true)
     public int batchDeleteActivityByIds(List<String> idList) {
         int result = tActivityMapper.deleteByIds(idList);
-        
-        // 确保事务提交后清除缓存
-        if (result > 0) {
-            cacheRefreshConfig.clearCacheAfterTransaction("activityCache", "ongoingActivityCache");
-        }
         
         return result;
     }
