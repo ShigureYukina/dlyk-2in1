@@ -1,15 +1,15 @@
 # ============================================================
 # Prometheus 采集配置
 #
-# 应用跑在宿主机 8089，因此用 host.docker.internal 访问。
+# 应用跑在宿主机，业务端口 8089 / 管理端口 9090（actuator），用 host.docker.internal 访问。
 # 启动：
 #   docker run -d --name dlyk-prometheus -p 9090:9090 \
 #     -v "$PWD/deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro" \
 #     --add-host host.docker.internal:host-gateway prom/prometheus:v2.54.1
 #
 # 关键指标：
-#   缓存命中率 = sum(rate(cache_gets_total{result="hit"}[5m]))
-#              / sum(rate(cache_gets_total{result!="pending"}[5m]))
+#   缓存命中率 = sum(rate(dlyk_list_total_cache_gets_total{result="hit"}[5m]))
+#              / sum(rate(dlyk_list_total_cache_gets_total[5m]))
 #   对账差异   = dlyk_reconcile_issues_total（>0 即应告警）
 # ============================================================
 global:
@@ -20,6 +20,6 @@ scrape_configs:
   - job_name: 'dlyk-server'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8089']
+      - targets: ['host.docker.internal:9090']
         labels:
           application: 'dlyk-server'

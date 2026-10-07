@@ -8,6 +8,7 @@ import com.dlyk.result.R;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -39,11 +40,15 @@ public class CacheManagementController {
     
     /**
      * 清除指定缓存
-     * 
+     *
+     * <p>清缓存 / 预热属于管理面写操作：任意登录用户可反复触发的清空与全表预热
+     * 是一条低成本 DoS 路径，因此统一限定 admin 角色（authority 来自 t_role 种子数据）。
+     *
      * @param cacheName 缓存名称
      * @param key 缓存键
      * @return 操作结果
      */
+    @PreAuthorize("hasAuthority('admin')")
     @DeleteMapping("/evict")
     public R evictCache(@RequestParam String cacheName, @RequestParam String key) {
         try {
@@ -63,6 +68,7 @@ public class CacheManagementController {
      * @param keyPrefix key 前缀
      * @return 操作结果
      */
+    @PreAuthorize("hasAuthority('admin')")
     @DeleteMapping("/evictByPrefix")
     public R evictCacheByPrefix(@RequestParam String cacheName, @RequestParam String keyPrefix) {
         try {
@@ -84,6 +90,7 @@ public class CacheManagementController {
      * @param cacheName 缓存名称
      * @return 操作结果
      */
+    @PreAuthorize("hasAuthority('admin')")
     @DeleteMapping("/clear")
     public R clearCache(@RequestParam String cacheName) {
         try {
@@ -105,6 +112,7 @@ public class CacheManagementController {
      * 
      * @return 操作结果
      */
+    @PreAuthorize("hasAuthority('admin')")
     @PostMapping("/warmup")
     public R manualWarmup() {
         try {
@@ -146,6 +154,7 @@ public class CacheManagementController {
      * 
      * @return 操作结果
      */
+    @PreAuthorize("hasAuthority('admin')")
     @PostMapping("/clearUnusedLocks")
     public R clearUnusedLocks() {
         try {

@@ -39,10 +39,35 @@
 
 ```bash
 docker compose up -d        # 起依赖栈（MySQL/Redis/RabbitMQ/Nginx/XXL-Job Admin）
-# 导入 dlyk.sql（含 deleted 列与升级脚本 sql/upgrade/）
+# 导入 dlyk.sql（含 deleted 列、条件唯一索引兜底与对账表）
 # 造数：tools/db/01_gen_perf_data.sql（35.6 万行压测数据）
 # 压测：tools/load/locustfile.py（Locust 2.46.5，50 并发 / 60s）
 ```
+
+### 环境变量（仓库内不落任何密钥）
+
+| 变量 | 用途 | 配在哪 |
+| --- | --- | --- |
+| `MYSQL_ROOT_PASSWORD` | 依赖栈 MySQL root 密码 | `.env`（compose 自动读取，缺失时 compose 直接报错） |
+| `MYSQL_PASSWORD` | 应用连接 MySQL 的密码 | 启动应用的环境（IDE 运行配置 / shell） |
+| `JWT_SECRET` | JWT 签名密钥，缺失时应用拒绝启动 | 同上 |
+
+```bash
+# 依赖栈密钥写进 .env（该文件已被 gitignore，不入库）：
+#   MYSQL_ROOT_PASSWORD=你的密码
+# 应用侧（宿主机直跑 jar/IDE）需要：
+#   export MYSQL_PASSWORD=你的密码
+#   export JWT_SECRET=一段足够长的随机串（如 openssl rand -base64 48 生成）
+```
+
+> 历史提交中曾出现旧的 DB 密码与 JWT 密钥（均已从代码移除并作废）。本机库仍在用旧密码的，
+> 建议执行 `ALTER USER 'root'@'%' IDENTIFIED BY '<新密码>';` 轮换一次。
+
+### 管理面
+
+actuator 迁移到独立管理端口 `9090`（`management.server.port`），业务端口 8089 不再暴露任何
+管理端点；Prometheus 按 `deploy/prometheus/prometheus.yml` 抓取 9090。缓存管理接口
+（`/api/cache/*` 的写操作）限定 `admin` 角色。
 
 ## 说明
 
