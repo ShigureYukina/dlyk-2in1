@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author ShigureYukina
  */
-@SpringBootTest(properties = "xxl.job.enabled=false")
+@SpringBootTest(properties = {"xxl.job.enabled=false", "management.server.port=0"})
 class CustomerConvertConcurrencyTest {
 
     /** 并发线程数 */

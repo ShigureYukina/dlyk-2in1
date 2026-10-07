@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 双层缓存功能测试类
  * 用于验证L1（Caffeine）和L2（Redis）缓存的协同工作
  */
-@SpringBootTest(classes = DlykServerApplication.class)
+@SpringBootTest(classes = DlykServerApplication.class, properties = "management.server.port=0")
 class TwoLevelCacheTest {
 
     @Autowired
