@@ -114,12 +114,28 @@ class CustomerManagerTest {
         // 准备测试数据
         when(tClueMapper.selectByPrimaryKey(1)).thenReturn(mockClue);
         when(tCustomerMapper.insertSelective(any(TCustomer.class))).thenReturn(0); // 插入失败
-        when(tClueMapper.updateByPrimaryKeySelective(any(TClue.class))).thenReturn(1);
 
-        // 执行测试
-        Boolean result = customerManager.convertCustomer(customerQuery);
+        // 执行测试并验证异常 - 插入失败必须抛异常让事务回滚，而不是返回 false 静默提交
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            customerManager.convertCustomer(customerQuery);
+        });
 
-        // 验证结果 - 应该返回false，因为插入失败
-        assertFalse(result, "当数据库插入失败时，转换应该失败");
+        assertEquals("客户插入失败，线索转换已终止", exception.getMessage());
+        verify(tClueMapper, never()).updateByPrimaryKeySelective(any(TClue.class));
+    }
+
+    @Test
+    void testConvertCustomer_PartialSuccessMustRollback() {
+        // 准备测试数据 - 插入成功但线索状态更新失败：这是最危险的"部分成功"场景。
+        // 若只 return false，事务会带着"客户已落库、线索未标记转换"的中间状态照常提交
+        when(tClueMapper.selectByPrimaryKey(1)).thenReturn(mockClue);
+        when(tCustomerMapper.insertSelective(any(TCustomer.class))).thenReturn(1);
+        when(tClueMapper.updateByPrimaryKeySelective(any(TClue.class))).thenReturn(0);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            customerManager.convertCustomer(customerQuery);
+        });
+
+        assertEquals("线索状态更新失败，客户创建已回滚", exception.getMessage());
     }
 }

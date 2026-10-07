@@ -20,8 +20,11 @@ import java.util.concurrent.TimeUnit;
  * 互斥语义失效。此处改为 Redisson 的 {@link RLock}，由 Redis 统一仲裁，
  * 多实例部署下仍保证同一 key 同一时刻只有一个执行者。
  *
- * <p>锁通过租约（leaseTime）自动过期：持锁进程崩溃时，锁最多在 leaseTime 后自动释放，
- * 不会像进程内锁那样产生无法回收的死锁。释放前会校验持有者线程，防止超时后误删他人锁。
+ * <p>默认的 {@code tryLock} 不传 leaseTime，启用 Redisson 看门狗：默认 30s 租约，
+ * 持锁线程存活期间自动续期。这保证锁的生命周期能覆盖到事务提交——转换客户要求
+ * 「锁在事务提交之后释放」（见 CustomerServiceImpl 的设计说明），若写死一个较短的
+ * 租约（如 5s），事务一旦超过租约，锁先于提交过期，互斥窗口重开。进程崩溃后
+ * 看门狗停止续期，锁最迟在默认租约到期后自动释放，不会产生无法回收的死锁。
  *
  * @author ShigureYukina
  */
@@ -32,9 +35,6 @@ public class CacheLockManager {
 
     /** 默认最长等待获取锁的时间（秒） */
     private static final long DEFAULT_WAIT_TIME = 3;
-
-    /** 默认锁租约时间（秒），到期自动释放，防止持锁进程崩溃导致死锁 */
-    private static final long DEFAULT_LEASE_TIME = 5;
 
     private static final TimeUnit DEFAULT_UNIT = TimeUnit.SECONDS;
 
@@ -58,17 +58,18 @@ public class CacheLockManager {
     }
 
     /**
-     * 尝试获取锁，使用默认等待时间与租约时间。
+     * 尝试获取锁，使用默认等待时间。不传 leaseTime，启用看门狗自动续期
+     * （持锁期间锁不过期，进程崩溃后按 Redisson 默认租约自动释放）。
      *
      * @param key 锁 key
      * @return 是否成功获取锁
      */
     public boolean tryLock(String key) {
-        return tryLock(key, DEFAULT_WAIT_TIME, DEFAULT_LEASE_TIME, DEFAULT_UNIT);
+        return tryLock(key, DEFAULT_WAIT_TIME, DEFAULT_UNIT);
     }
 
     /**
-     * 尝试获取锁，自定义等待时间，租约时间取默认值。
+     * 尝试获取锁，自定义等待时间，不传 leaseTime（看门狗模式，见类说明）。
      *
      * @param key       锁 key
      * @param waitTime  最长等待时间
@@ -76,11 +77,26 @@ public class CacheLockManager {
      * @return 是否成功获取锁
      */
     public boolean tryLock(String key, long waitTime, TimeUnit unit) {
-        return tryLock(key, waitTime, DEFAULT_LEASE_TIME, unit);
+        RLock lock = getLock(key);
+        try {
+            // 两参重载不写 leaseTime：由看门狗续期，锁的释放只取决于业务是否执行完
+            boolean acquired = lock.tryLock(waitTime, unit);
+            if (acquired) {
+                heldLockKeys.add(key);
+            } else {
+                log.warn("获取分布式锁失败，key: {}, 等待时间: {} {}", key, waitTime, unit);
+            }
+            return acquired;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("获取分布式锁被中断，key: {}", key, e);
+            return false;
+        }
     }
 
     /**
-     * 尝试获取锁，自定义等待时间与租约时间。
+     * 尝试获取锁，自定义等待时间与租约时间（显式租约模式，看门狗不生效）。
+     * 仅建议给「持锁时长可精确预估」的场景使用。
      *
      * @param key       锁 key
      * @param waitTime  最长等待获取锁的时间

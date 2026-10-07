@@ -46,11 +46,19 @@ public class CustomerManager {
         tCustomer.setCreateBy(loginUserId); // 创建人
 
         int insert = tCustomerMapper.insertSelective(tCustomer);
+        if (insert < 1) {
+            throw new RuntimeException("客户插入失败，线索转换已终止");
+        }
 
         // 更新线索状态为已转换
         tclue.setState(-1);
         int update = tClueMapper.updateByPrimaryKeySelective(tclue);
+        if (update < 1) {
+            // 插入成功但状态更新失败：必须抛异常触发回滚。
+            // 若只 return false，事务照常提交，会留下"客户已落库、线索仍可再次转换"的部分成功脏数据
+            throw new RuntimeException("线索状态更新失败，客户创建已回滚");
+        }
 
-        return update >= 1 && insert >= 1;
+        return true;
     }
 }

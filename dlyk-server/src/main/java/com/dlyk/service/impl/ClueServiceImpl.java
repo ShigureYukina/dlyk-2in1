@@ -91,6 +91,9 @@ public class ClueServiceImpl implements ClueService {
      * 前端"校验手机号是否已存在 -> 提交新增"是两步操作，多实例部署时两个实例
      * 可以同时通过手机号校验并各自插入，产生重复线索。改为按手机号加分布式锁后，
      * 同一手机号的创建请求在集群范围内串行。
+     *
+     * <p>锁只解决"同时"，不解决"先后"：前后两次串行提交仍会各自插入。
+     * 因此拿到锁之后还要以锁内的这次查询为准复查手机号，才能真正防重。
      */
     @Override
     public int addClue(ClueQuery cluequery) {
@@ -99,6 +102,10 @@ public class ClueServiceImpl implements ClueService {
             throw new DuplicateRequestException("该手机号正在创建线索，请稍后重试");
         }
         try {
+            if (tClueMapper.selectByPhone(cluequery.getPhone()) > 0) {
+                throw new DuplicateRequestException("该手机号已存在线索，请勿重复创建");
+            }
+
             TClue tClue = new TClue();
 
             BeanUtils.copyProperties(cluequery, tClue);
