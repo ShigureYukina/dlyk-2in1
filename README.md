@@ -18,6 +18,7 @@
 | `docs/load/` | 压测记录：Locust / JMeter、干净 A/B 对照、口径说明 |
 | `docs/perf/` | 性能排查：慢 SQL 探针、索引实验、Redis 往返统计口径 |
 | `docs/es/` | 线索检索：MySQL 为主库 / ES 为检索副本的同步与兜底方案 |
+| `docs/product/` | 产品文档：线索管理与客户转换 PRD、列表体验治理专项 PRD、国内 B 端 CRM 竞品分析（需求侧口径，与技术文档同源） |
 | `tools/` | Locust 场景脚本、JMeter 测试计划、DB 造数与探针脚本、重启脚本 |
 | `deploy/` | Nginx 反向代理（统一入口 / IP 限流 / gzip）与 Prometheus 配置 |
 | `docker-compose.yml` | 本地依赖栈：MySQL / Redis / RabbitMQ / Elasticsearch / Nginx / XXL-Job Admin |
