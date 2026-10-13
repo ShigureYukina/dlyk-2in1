@@ -277,6 +277,23 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!--
+                          测试期专用签名密钥，**不是任何环境的真实密钥**，只作用于 surefire。
+                          为什么需要它：JWTUtils 按 b5d88bb 的要求「仓库内不落任何默认密钥」，
+                          缺 JWT_SECRET 时直接快速失败。这在 CI 里没问题（ci.yml 设了环境变量），
+                          但本地 `mvn test` 会让 CustomerManagerTest 这类需要签发 token 的用例
+                          整类报 ExceptionInInitializerError，看起来像代码坏了，其实只是没给变量。
+                          真实密钥仍然只能从环境变量 / -D 传入，这里只是给测试兜底。
+                        -->
+                        <jwt.secret>test-only-secret-do-not-use-in-any-real-env</jwt.secret>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
