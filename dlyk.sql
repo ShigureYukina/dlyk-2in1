@@ -576,6 +576,11 @@ INSERT INTO `t_permission` VALUES (58, '系统管理-录入', 'system:add', NULL
 INSERT INTO `t_permission` VALUES (59, '系统管理-编辑', 'system:edit', NULL, 'button', 56, NULL, NULL);
 INSERT INTO `t_permission` VALUES (60, '系统管理-查看', 'system:view', NULL, 'button', 56, NULL, NULL);
 INSERT INTO `t_permission` VALUES (61, '系统管理-删除', 'system:delete', NULL, 'button', 56, NULL, NULL);
+-- 线索域补三个按钮权限：ClueController 上的 @PreAuthorize 覆盖 clue:batchDelete / clue:convert / clue:export，
+-- 原库缺这三行，导致这三个注解即使打开也永远匹配不到任何用户的 authority（一律 403）。
+INSERT INTO `t_permission` VALUES (1112, '线索管理-批量删除', 'clue:batchDelete', NULL, 'button', 12, NULL, NULL);
+INSERT INTO `t_permission` VALUES (1113, '线索管理-转为客户', 'clue:convert', NULL, 'button', 12, NULL, NULL);
+INSERT INTO `t_permission` VALUES (1114, '线索管理-导出', 'clue:export', NULL, 'button', 12, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_product
@@ -727,6 +732,20 @@ INSERT INTO `t_role_permission` VALUES (73, 2, 24);
 INSERT INTO `t_role_permission` VALUES (74, 2, 25);
 INSERT INTO `t_role_permission` VALUES (75, 2, 26);
 INSERT INTO `t_role_permission` VALUES (76, 2, 27);
+-- 补齐线索域新权限的角色映射（配合上面 1112/1113/1114 三行）。
+-- 授权口径：批量删除是破坏性操作，只给 admin 与 manager；转为客户、导出给 admin/saler/manager。
+INSERT INTO `t_role_permission` VALUES (77, 1, 1112);
+INSERT INTO `t_role_permission` VALUES (78, 1, 1113);
+INSERT INTO `t_role_permission` VALUES (79, 1, 1114);
+INSERT INTO `t_role_permission` VALUES (80, 2, 1113);
+INSERT INTO `t_role_permission` VALUES (81, 2, 1114);
+INSERT INTO `t_role_permission` VALUES (82, 3, 1112);
+INSERT INTO `t_role_permission` VALUES (83, 3, 1113);
+INSERT INTO `t_role_permission` VALUES (84, 3, 1114);
+-- manager 原先没有任何权限映射，开 @PreAuthorize 后会全线 403，补上线索域的查看、批量与导出。
+-- 单条新增/编辑/删除仍只归 admin 与 saler：manager 是看和批，不替销售改单条记录。
+INSERT INTO `t_role_permission` VALUES (85, 3, 13);
+INSERT INTO `t_role_permission` VALUES (86, 3, 16);
 
 -- ----------------------------
 -- Table structure for t_system_info
@@ -883,7 +902,12 @@ CREATE TABLE `t_user`  (
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-INSERT INTO `t_user` VALUES (1, 'admin', '$2a$10$Nlhwhtd0BSCBK95CAifv7eWpCjHloPBMZ3Gaehcc56hRAV3DZALJO', '管理员', '13700000000', 'admin@qq.com', 1, 1, 1, 1, '2023-02-22 09:37:12', NULL, '2023-05-23 00:21:06', NULL, '2023-12-10 21:18:59');
+-- admin 的 login_pwd 是 'admin123'。
+-- 原哈希（$2a$10$Nlhwhtd0BSCBK95CAifv7eWpCjHloPBMZ3Gaehcc56hRAV3DZALJO）匹配不上 admin123，
+-- 而 tools/load/locustfile.py、tools/jmeter/dlyk-crm.jmx、crm-api-autotest/config.yaml
+-- 三个地方都按 admin/admin123 登录——照文档跑一定失败。下面这个哈希是重新生成的，
+-- 已用 BCryptPasswordEncoder.matches("admin123", hash) 自校验通过。
+INSERT INTO `t_user` VALUES (1, 'admin', '$2a$10$ihhTvLEWiYTCT4kLqXf3PewmuWdWn4a2bGN3UzZMZE.aqJFukJXUu', '管理员', '13700000000', 'admin@qq.com', 1, 1, 1, 1, '2023-02-22 09:37:12', NULL, '2023-05-23 00:21:06', NULL, '2023-12-10 21:18:59');
 INSERT INTO `t_user` VALUES (2, 'yuyan', '$2a$10$ZzzAd0nDuUGfGSjJDnZIyOaW7mUZkFzsYgOqiF/b07po/BGxBFjJ.', '于嫣', 'null', 'yuyan@163.com', 1, 1, 1, 1, '2023-02-28 12:11:40', NULL, '2023-05-23 00:21:14', NULL, '2023-11-29 20:14:31');
 INSERT INTO `t_user` VALUES (3, 'zhangqi', '$2a$10$Q0qTW6QqkabTzFyoilViw..YdrVzZkSKe5RvLmjgPgW/IrcPkBoF.', '张琪', '1362362323', 'zhangqi@qq.com', 1, 1, 1, 1, '2023-03-02 11:37:34', NULL, '2023-05-23 00:21:02', NULL, NULL);
 INSERT INTO `t_user` VALUES (4, 'suwanting', '$2a$10$3bambNLTCAKtQn2OXPiHb.f0SzH.MucTiLi6GPT6nQrYpsxsdxaFi', '苏婉婷', NULL, 'suwanting@qq.com', 1, 1, 1, 1, '2023-04-03 15:04:54', NULL, NULL, NULL, NULL);
