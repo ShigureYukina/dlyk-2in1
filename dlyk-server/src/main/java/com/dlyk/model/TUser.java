@@ -103,7 +103,11 @@ public class TUser implements UserDetails, Serializable {
 
     /**
      * 权限标识符List
+     *
+     * @deprecated 历史遗留空壳字段：全仓库没有任何赋值路径，权限实际落在 {@link #ButtonPermissionList}。
+     * 保留仅为兼容旧 JSON 结构，<b>不要</b>再往这里塞权限，否则 getAuthorities() 读不到。
      */
+    @Deprecated
     private List<String> permissionList;
     /**
      * 权限标识符List
@@ -135,9 +139,13 @@ public class TUser implements UserDetails, Serializable {
                 list.add(new SimpleGrantedAuthority(role));
             });
         }
-        if (!ObjectUtils.isEmpty(this.getPermissionList())) {
-            //权限标识符
-            this.getPermissionList().forEach(permission -> {
+        // 按钮级权限标识符（clue:list / clue:convert ...）。
+        // 这里必须读 ButtonPermissionList —— 它才是 UserServiceImpl.loadUserByUsername 实际填充、
+        // 并随 JWT 下发的那个字段；permissionList 是历史遗留的空壳字段，任何赋值路径都没有。
+        // 原先读的是 permissionList，导致 getAuthorities() 永远只拿到角色，
+        // Controller 上的 @PreAuthorize("hasAnyAuthority('clue:xxx')") 只要开着就必然 403。
+        if (!ObjectUtils.isEmpty(this.getButtonPermissionList())) {
+            this.getButtonPermissionList().forEach(permission -> {
                 list.add(new SimpleGrantedAuthority(permission));
             });
         }

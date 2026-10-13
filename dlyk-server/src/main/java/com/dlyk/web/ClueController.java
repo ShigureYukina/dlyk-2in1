@@ -28,11 +28,11 @@ public class ClueController {
     @Resource
     private CustomerService customerService;
 
-//    @PreAuthorize(value="hasAnyAuthority('clue:list')")
     /**
      * 线索列表分页。name/phone 是前端搜索框参数：dlyk.es.enabled=true 时走 ES 检索，
      * 否则按原分页路径返回（历史上这两个参数一直被本方法丢弃，检索上线后真正生效）。
      */
+    @PreAuthorize(value="hasAnyAuthority('clue:list')")
     @GetMapping(value = "/api/clues")
     public R CluePage(@RequestParam(value = "current", required = false) Integer current,
                       @RequestParam(value = "name", required = false) String name,
@@ -62,20 +62,23 @@ public class ClueController {
         return R.OK(data);
     }
 
-//    @PreAuthorize(value="hasAnyAuthority('clue:import')")
+    @PreAuthorize(value="hasAnyAuthority('clue:import')")
     @PostMapping(value = "/api/importExcel")
     public R importExcel(MultipartFile file, @RequestHeader(value = "Authorization") String token) throws Exception {//file的文件名要和前端传过来的文件名一致
         clueService.importExcel(file.getInputStream(), token);
         return R.OK();
     }
 
+    // 手机号查重：只有新增线索的表单会用它。原先只要求登录态，等于给未授权调用方留了一个
+    // 「这个手机号在不在库里」的存在性探测口（可批量枚举），所以按 clue:add 收口。
+    @PreAuthorize(value="hasAnyAuthority('clue:add')")
     @GetMapping(value = "/api/clue/{phone}")
     public R checkPhone(@PathVariable("phone") String phone) {
         Boolean check = clueService.checkPhone(phone);
         return check ? R.OK() : R.FAIL();
     }
 
-//    @PreAuthorize(value="hasAnyAuthority('clue:add')")
+    @PreAuthorize(value="hasAnyAuthority('clue:add')")
     @PostMapping(value = "/api/clue")
     public R addClue(ClueQuery cluequery, @RequestHeader(value = "Authorization") String token) {
         cluequery.setToken(token);
@@ -83,35 +86,35 @@ public class ClueController {
         return save >= 1 ? R.OK() : R.FAIL();
     }
 
-//    @PreAuthorize(value="hasAnyAuthority('clue:view')")
+    @PreAuthorize(value="hasAnyAuthority('clue:view')")
     @GetMapping(value = "/api/clue/detail/{id}")
     public R getClue(@PathVariable("id") Integer id) {
         TClue clue = clueService.getClue(id);
         return clue != null ? R.OK(clue) : R.FAIL();
     }
 
-//    @PreAuthorize(value="hasAnyAuthority('clue:edit')")
+    @PreAuthorize(value="hasAnyAuthority('clue:edit')")
     @PutMapping(value = "/api/clue")
     public R updateClue(ClueQuery cluequery, @RequestHeader(value = "Authorization") String token) {
         cluequery.setToken(token);
         int update = clueService.updateClue(cluequery);
         return update >= 1 ? R.OK() : R.FAIL();
     }
-//    @PreAuthorize(value="hasAnyAuthority('clue:delete')")
+    @PreAuthorize(value="hasAnyAuthority('clue:delete')")
     @DeleteMapping(value = "/api/clue/{id}")
     public R deleteClue(@PathVariable("id") Integer id) {
         int delete = clueService.deleteClue(id);
         return delete >= 1 ? R.OK() : R.FAIL();
     }
     
-    //    @PreAuthorize(value="hasAnyAuthority('clue:batchDelete')")
+    @PreAuthorize(value="hasAnyAuthority('clue:batchDelete')")
     @DeleteMapping(value = "/api/clues")
     public R batchDeleteClue(@RequestBody List<Integer> idList) {
         int delete = clueService.batchDeleteClue(idList);
         return delete >= 1 ? R.OK() : R.FAIL();
     }
     
-    //    @PreAuthorize(value="hasAnyAuthority('clue:convert')")
+    @PreAuthorize(value="hasAnyAuthority('clue:convert')")
     @Idempotent(prefix = "customer:convert", key = "#id", timeout = 30)
     @PostMapping(value = "/api/clue/convert/{id}")
     public R convertToCustomer(@PathVariable("id") Integer id, @RequestHeader(value = "Authorization") String token) {
@@ -122,13 +125,13 @@ public class ClueController {
         return result ? R.OK() : R.FAIL();
     }
     
-    //    @PreAuthorize(value="hasAnyAuthority('clue:export')")
+    @PreAuthorize(value="hasAnyAuthority('clue:export')")
     @GetMapping(value = "/api/clue/export")
     public void exportClueExcel(HttpServletResponse response) throws Exception {
         clueService.exportClueExcel(response);
     }
     
-    //    @PreAuthorize(value="hasAnyAuthority('clue:export')")
+    @PreAuthorize(value="hasAnyAuthority('clue:export')")
     @PostMapping(value = "/api/clue/export/selected")
     public void exportSelectedClue(@RequestBody List<Integer> idList, HttpServletResponse response) throws Exception {
         clueService.exportSelectedClue(idList, response);
