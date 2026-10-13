@@ -42,10 +42,15 @@
 ## 快速开始
 
 ```bash
-docker compose up -d        # 起依赖栈（MySQL/Redis/RabbitMQ/Nginx/XXL-Job Admin）
+docker compose up -d        # 一键起全栈：依赖栈 + 应用镜像（dlyk-server/Dockerfile 多阶段构建）
+# 前置：.env 里配置 MYSQL_ROOT_PASSWORD 与 JWT_SECRET（缺失时 compose 直接报错）
 # 导入 dlyk.sql（含 deleted 列、条件唯一索引兜底与对账表）
 # 造数：tools/db/01_gen_perf_data.sql（35.6 万行压测数据）
 # 压测：tools/load/locustfile.py（Locust 2.46.5，50 并发 / 60s）
+
+# 只起依赖栈、应用跑在宿主机的旧模式：
+#   docker compose up -d mysql redis rabbitmq nginx
+#   （deploy/nginx/nginx.conf 的 upstream 需改回 host.docker.internal:8089，文件内有注释）
 ```
 
 ### 环境变量（仓库内不落任何密钥）
@@ -61,9 +66,10 @@ docker compose up -d        # 起依赖栈（MySQL/Redis/RabbitMQ/Nginx/XXL-Job 
 ```bash
 # 依赖栈密钥写进 .env（该文件已被 gitignore，不入库）：
 #   MYSQL_ROOT_PASSWORD=你的密码
+#   JWT_SECRET=一段足够长的随机串（如 openssl rand -base64 48 生成）
 # 应用侧（宿主机直跑 jar/IDE）需要：
 #   export MYSQL_PASSWORD=你的密码
-#   export JWT_SECRET=一段足够长的随机串（如 openssl rand -base64 48 生成）
+#   export JWT_SECRET=同上
 ```
 
 > 历史提交中曾出现旧的 DB 密码与 JWT 密钥（均已从代码移除并作废）。本机库仍在用旧密码的，

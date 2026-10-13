@@ -78,3 +78,50 @@ jobs:
           DLYK_ES_ENABLED: "true"
           DLYK_ES_IT: "true"
         run: mvn -B test
+
+  # 应用镜像的构建与冒烟：本地无 Docker，这是镜像链路唯一真实验证路径。
+  # 多阶段构建（Maven 层内嵌）→ 起依赖容器 → 跑容器 → 健康检查必须 UP。
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t dlyk-server:ci dlyk-server
+
+      - name: Start dependency containers
+        run: |
+          docker network create ci-net
+          docker run -d --name mysql --network ci-net \
+            -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=dlyk -e TZ=Asia/Shanghai \
+            mysql:8.0
+          docker run -d --name redis --network ci-net redis:7.2-alpine
+          docker run -d --name rabbitmq --network ci-net rabbitmq:3.13-management-alpine
+          docker run -d --name elasticsearch --network ci-net \
+            -e discovery.type=single-node -e xpack.security.enabled=false \
+            -e ES_JAVA_OPTS="-Xms512m -Xmx512m" \
+            elasticsearch:8.11.4
+          for i in $(seq 1 30); do
+            if docker exec mysql mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then break; fi
+            sleep 2
+          done
+          docker exec -i mysql mysql -uroot -proot --default-character-set=utf8mb4 dlyk < dlyk.sql
+
+      - name: Run container & smoke test
+        run: |
+          docker run -d --name dlyk-app --network ci-net -p 9090:9090 \
+            -e MYSQL_HOST=mysql -e MYSQL_USERNAME=root -e MYSQL_PASSWORD=root \
+            -e JWT_SECRET=ci-only-test-secret-do-not-use-in-any-real-env \
+            -e REDIS_HOST=redis -e RABBITMQ_HOST=rabbitmq -e ES_URIS=http://elasticsearch:9200 \
+            -e XXL_JOB_ENABLED=false -e DLYK_MQ_ENABLED=false \
+            dlyk-server:ci
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:9090/actuator/health | grep -q '"status":"UP"'; then
+              echo "container healthy"; exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::container failed to become healthy"
+          docker logs dlyk-app | tail -80
+          exit 1

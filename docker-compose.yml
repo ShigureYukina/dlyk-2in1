@@ -110,6 +110,45 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # 应用容器：dlyk-server/Dockerfile 多阶段构建（Maven 构建 → layertools 分层 → JRE）
+  # 必需环境变量走 .env（JWT_SECRET 缺失时应用拒绝启动）
+  app:
+    build:
+      context: ./dlyk-server
+      args:
+        IMAGE_PREFIX: ${IMAGE_PREFIX:-}
+    image: dlyk-server:local
+    container_name: dlyk-app
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中配置 MYSQL_ROOT_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 中配置 JWT_SECRET}
+      REDIS_HOST: redis
+      RABBITMQ_HOST: rabbitmq
+      XXL_JOB_ADMIN_ADDRESSES: http://xxl-job-admin:8080/xxl-job-admin
+      ES_URIS: http://elasticsearch:9200
+      TZ: Asia/Shanghai
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9090/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+
   # XXL-Job 调度中心：承载原 @Scheduled 定时任务的调度、重试、分片与告警
   # 控制台 http://localhost:8080/xxl-job-admin (admin/123456)
   xxl-job-admin:
@@ -120,7 +159,7 @@ services:
       - "8080:8080"
     environment:
       PARAMS: >-
-        --spring.datasource.url=jdbc:mysql://host.docker.internal:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+        --spring.datasource.url=jdbc:mysql://mysql:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
         --spring.datasource.username=root
         --spring.datasource.password=${MYSQL_ROOT_PASSWORD:?请在 docker-compose.yml 同目录 .env 中配置 MYSQL_ROOT_PASSWORD}
     extra_hosts:
