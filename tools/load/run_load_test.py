@@ -33,10 +33,18 @@ import urllib.request
 import pymysql
 
 APP_HOST = os.getenv("DLYK_APP_HOST", "http://localhost:8089")
+# 密码只从环境变量取，没有默认值。仓库里留过默认密码，它随着提交进了 git 历史，
+# 而这个仓库是公开的——所以这里宁可缺变量直接报错，也不要给一个"看起来能跑"的假默认值。
+DB_PASSWORD = os.getenv("DLYK_DB_PASSWORD")
+if not DB_PASSWORD:
+    raise SystemExit(
+        "缺少 DLYK_DB_PASSWORD。请从 dlyk-2in1/.env 读取后导出：\n"
+        "  set -a && . ./.env && set +a && python tools/load/run_load_test.py ...\n"
+        "（.env 已被 .gitignore 忽略，仓库内不落任何密码）")
 DB = dict(host=os.getenv("DLYK_DB_HOST", "127.0.0.1"),
           port=int(os.getenv("DLYK_DB_PORT", "3306")),
           user=os.getenv("DLYK_DB_USER", "root"),
-          password=os.getenv("DLYK_DB_PASSWORD", "1056398086"),
+          password=DB_PASSWORD,
           database="dlyk")
 
 # 自埋点：列表 total 缓存的命中/未命中（见 com.dlyk.cache.ListTotalCache）

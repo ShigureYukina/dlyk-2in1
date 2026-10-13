@@ -13,7 +13,14 @@
 set -uo pipefail
 
 LABEL="${1:-unknown}"
-MYSQL="docker exec -i dlyk-mysql mysql -uroot -p1056398086 dlyk -N -B"
+
+# 密码从环境变量取，不给默认值：仓库是公开的，写死过一次的密码已经进了 git 历史。
+# 用法：set -a && . ./.env && set +a && tools/db/perf_probe.sh before
+if [ -z "${MYSQL_ROOT_PASSWORD:-}" ]; then
+  echo "缺少 MYSQL_ROOT_PASSWORD。先执行：set -a && . ./.env && set +a" >&2
+  exit 1
+fi
+MYSQL="docker exec -i dlyk-mysql mysql -uroot -p${MYSQL_ROOT_PASSWORD} dlyk -N -B"
 
 run_sql() {
   $MYSQL -e "$1" 2>/dev/null
