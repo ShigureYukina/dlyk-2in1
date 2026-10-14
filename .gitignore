@@ -382,3 +382,9 @@ tools/load/__pycache__/
 
 # ShardingSphere 本地生成配置（含真实连接信息，从模板生成）
 dlyk-server/src/main/resources/sharding.yaml
+
+# 上面的 toptal 模板在 Redis 段写了 `*.conf`（第 355 行，为的是忽略本地 redis.conf），
+# 它会连带命中 deploy/nginx/nginx.conf——而 docker-compose.yml 把该文件 bind mount 进容器。
+# 后果不是"少个文件"：新克隆的仓库执行 docker compose up，Docker 会把缺失的源路径
+# 自动创建成目录，nginx 拿到一个目录当配置、启动失败，报错指向配置格式而非文件缺失。
+!deploy/nginx/nginx.conf
