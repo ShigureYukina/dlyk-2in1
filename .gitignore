@@ -388,3 +388,8 @@ dlyk-server/src/main/resources/sharding.yaml
 # 后果不是"少个文件"：新克隆的仓库执行 docker compose up，Docker 会把缺失的源路径
 # 自动创建成目录，nginx 拿到一个目录当配置、启动失败，报错指向配置格式而非文件缺失。
 !deploy/nginx/nginx.conf
+
+# ==================== 文档与实验工具 ====================
+# 仅在本地保留，不入库（仓库只存可运行的前后端代码与部署配置）
+/docs/
+/tools/
