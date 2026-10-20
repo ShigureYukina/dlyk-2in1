@@ -396,3 +396,6 @@ dlyk-server/src/main/resources/sharding.yaml
 
 # 前端脚手架说明文档：不入库（只保留根 README）
 /dlyk-front/README.md
+
+# 编辑器配置不属于代码（放在文件末尾，覆盖上面的 !.vscode/ 例外）
+/dlyk-front/.vscode/
