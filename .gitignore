@@ -393,3 +393,6 @@ dlyk-server/src/main/resources/sharding.yaml
 # 仅在本地保留，不入库（仓库只存可运行的前后端代码与部署配置）
 /docs/
 /tools/
+
+# 前端脚手架说明文档：不入库（只保留根 README）
+/dlyk-front/README.md
